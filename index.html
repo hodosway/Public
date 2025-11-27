@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>真理日报：编辑室</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Special+Elite&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* 更陈旧的纸张颜色 */
+            --paper-bg: #e8e4d3; 
+            --paper-shadow: #c0b8a0;
+            
+            /* 模拟不完全黑的油墨 */
+            --ink-color: #2b2b2b;
+            --ink-faded: #4a4a4a;
+            
+            --accent-red: #8a1c1c;
+            --border-color: #a8a08a;
+        }
+
+        body {
+            background-color: #1a1510;
+            color: var(--ink-color);
+            font-family: 'Noto Serif SC', serif;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* 深色木纹背景 */
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(0,0,0,0.2), rgba(0,0,0,0.8)),
+                url('https://www.transparenttextures.com/patterns/wood-pattern.png');
+        }
+
+        /* 报纸主体 */
+        #newspaper {
+            width: 1000px;
+            height: 96vh;
+            background-color: var(--paper-bg);
+            /* 复杂的纸张纹理叠加 */
+            background-image: 
+                /* 边缘暗角 */
+                radial-gradient(circle at center, transparent 60%, rgba(139, 119, 90, 0.2) 100%),
+                /* 噪点纹理 */
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
+            
+            box-shadow: 
+                0 1px 1px rgba(0,0,0,0.1),
+                0 10px 30px rgba(0,0,0,0.5),
+                inset 0 0 60px rgba(160, 140, 100, 0.2); /* 内部陈旧感 */
+            
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            border-left: 1px solid #d4cfc0;
+            border-right: 1px solid #ccc;
+        }
+
+        /* 全局变暗遮罩层 */
+        #global-dimmer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(2px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+            z-index: 50;
+        }
+
+        /* 报头区域 */
+        header {
+            border-bottom: 4px double var(--ink-color);
+            padding: 20px 40px 10px 40px;
+            text-align: center;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 10; /* 保证在变暗层下，但在内容上 */
+            background-color: var(--paper-bg); /* 防止文字重叠 */
+        }
+
+        .brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            font-weight: 900;
+            letter-spacing: -2px;
+            text-transform: uppercase;
+            line-height: 0.9;
+            margin-bottom: 10px;
+            color: #1a1a1a;
+            /* 模拟墨水边缘渗漏 */
+            text-shadow: 0 0 1px rgba(0,0,0,0.3); 
+            transform: scaleY(1.1); /*稍微拉长字体，更有年代感*/
+        }
+
+        .meta-bar {
+            border-top: 1px solid var(--ink-color);
+            border-bottom: 1px solid var(--ink-color);
+            padding: 4px 0;
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'Special Elite', monospace; /* 打字机字体 */
+        }
+
+        /* 主要内容布局 */
+        .content-wrapper {
+            display: flex;
+            flex-grow: 1;
+            overflow: hidden;
+            position: relative;
+            /* 为底部浮动桌子留出滚动空间 */
+            padding-bottom: 200px; 
+        }
+
+        /* 报纸折痕阴影 (视觉欺骗) */
+        .content-wrapper::before {
+            content: '';
+            position: absolute;
+            left: 75%; /* 侧边栏分割处 */
+            top: 0; bottom: 0;
+            width: 20px;
+            background: linear-gradient(to right, rgba(0,0,0,0.05), transparent);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        /* 左侧：新闻栏 */
+        #main-column {
+            flex: 3;
+            padding: 30px 40px;
+            overflow-y: auto;
+            border-right: 1px solid var(--border-color);
+            position: relative;
+        }
+        
+        #main-column::-webkit-scrollbar { width: 4px; }
+        #main-column::-webkit-scrollbar-thumb { background-color: #aaa; }
+
+        /* 文章样式 */
+        .article {
+            margin-bottom: 40px;
+            animation: fadeIn 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+            filter: sepia(0.2); /* 整体微黄 */
+        }
+
+        .headline {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            line-height: 1.05;
+            margin-bottom: 12px;
+            text-align: left;
+            color: #111;
+            /* 标题墨迹感 */
+            text-shadow: 0.5px 0.5px 0px rgba(0,0,0,0.1); 
+        }
+
+        .subhead {
+            font-family: 'Noto Serif SC', serif;
+            font-style: italic;
+            font-weight: 700;
+            color: var(--ink-faded);
+            margin-bottom: 20px;
+            padding-left: 15px;
+            border-left: 4px solid var(--ink-color);
+            font-size: 1.1rem;
+        }
+
+        .body-text {
+            font-size: 1.05rem;
+            line-height: 1.6;
+            text-align: justify;
+            columns: 2;
+            column-gap: 25px;
+            column-rule: 1px solid #dcdcdc; /* 栏间线 */
+            color: #222;
+        }
+
+        .body-text p {
+            margin-bottom: 15px;
+            text-indent: 0; /* 报纸通常首段不缩进，或者首字下沉 */
+        }
+        
+        .drop-cap::first-letter {
+            float: left;
+            font-size: 3.8rem;
+            line-height: 0.75;
+            font-weight: 900;
+            margin-right: 10px;
+            margin-top: 5px;
+            color: var(--ink-color);
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* 图片半色调处理 - 模拟报纸印刷网点 */
+        .news-photo-container {
+            width: 100%;
+            height: 220px;
+            margin-bottom: 15px;
+            border: 1px solid #333;
+            padding: 3px; /* 留白边框 */
+            background: #fff;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .news-photo {
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            /* 关键滤镜组合：高对比+灰度+老照片色调 */
+            filter: grayscale(100%) contrast(150%) brightness(0.9) sepia(30%);
+            /* 叠加半色调网点 */
+            mask-image: radial-gradient(circle, black 1px, transparent 1.5px);
+            mask-size: 4px 4px; /* 网点大小 */
+            -webkit-mask-image: radial-gradient(circle, black 1px, transparent 1.5px);
+            -webkit-mask-size: 4px 4px;
+        }
+
+        .photo-caption {
+            font-size: 0.75rem;
+            color: var(--ink-faded);
+            margin-bottom: 20px;
+            text-align: center;
+            font-family: 'Special Elite', monospace;
+            font-weight: bold;
+        }
+
+        /* 右侧：侧边栏 */
+        #side-column {
+            flex: 1;
+            padding: 20px 25px;
+            background-color: transparent; /* 与主色一致 */
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .stat-box {
+            border: 2px solid var(--ink-color);
+            padding: 12px;
+            background: #fdfbf7; /* 稍白的纸 */
+            box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
+            transform: rotate(0.5deg); /* 稍微手工粘贴的感觉 */
+        }
+        
+        .stat-title {
+            text-align: center;
+            font-weight: 900;
+            border-bottom: 2px solid var(--ink-color);
+            margin-bottom: 12px;
+            padding-bottom: 5px;
+            text-transform: uppercase;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-family: 'Special Elite', monospace;
+            font-size: 0.9rem;
+            color: #333;
+        }
+
+        .ad-space {
+            border: 1px dashed var(--ink-faded);
+            padding: 15px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            opacity: 0.8;
+            font-family: 'Noto Serif SC', serif;
+        }
+
+        /* === 底部：编辑决策台 (UI 核心修改处) ===
+           现在是悬浮的、半透明的、底部模糊的容器
+        */
+        #editor-desk {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 280px;
+            
+            /* 背景渐变：从完全透明过渡到深色木纹 */
+            background: linear-gradient(to bottom, 
+                rgba(26, 21, 16, 0) 0%, 
+                rgba(26, 21, 16, 0.4) 20%, 
+                rgba(26, 21, 16, 0.9) 50%,
+                #1a1510 100%);
+            
+            /* 关键：高斯模糊背景，使下方报纸文字模糊 */
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            
+            /* 视觉上的分割不再突兀，而是柔和的过渡 */
+            border-top: none; 
+            
+            display: flex;
+            gap: 40px;
+            align-items: center;
+            justify-content: center;
+            padding-top: 40px; /* 给渐变留出空间 */
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+        
+        /* 决策卡片 - 索引卡风格 */
+        .choice-card {
+            background-color: #fffef0;
+            width: 280px;
+            height: 180px;
+            padding: 20px;
+            box-shadow: 
+                0 2px 4px rgba(0,0,0,0.2),
+                0 10px 20px rgba(0,0,0,0.3);
+            border-radius: 2px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            border: none;
+            font-family: 'Special Elite', monospace;
+            color: #333;
+            overflow: hidden; /* 为了聚光灯效果 */
+        }
+
+        /* 模拟卡片纸纹 */
+        .choice-card::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        /* 聚光灯层 (默认隐藏) */
+        .spotlight-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.6) 0%, rgba(255, 240, 200, 0) 70%);
+            opacity: 0;
+            transition: opacity 0.2s;
+            mix-blend-mode: soft-light;
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        /* 选中状态动画 */
+        .choice-card:hover {
+            transform: translateY(-20px) scale(1.05) rotate(0deg) !important;
+            box-shadow: 0 30px 50px rgba(0,0,0,0.7);
+            background-color: #fff;
+            z-index: 150;
+            /* 杂边抖动动画 */
+            animation: nervous-shake 0.3s infinite;
+        }
+
+        .choice-card:hover .spotlight-overlay {
+            opacity: 1;
+        }
+
+        /* 抖动动画关键帧 */
+        @keyframes nervous-shake {
+            0% { transform: translateY(-20px) scale(1.05) rotate(0deg); }
+            25% { transform: translateY(-20px) scale(1.05) rotate(0.5deg); }
+            50% { transform: translateY(-20px) scale(1.05) rotate(-0.5deg); }
+            75% { transform: translateY(-20px) scale(1.05) rotate(0.2deg); }
+            100% { transform: translateY(-20px) scale(1.05) rotate(0deg); }
+        }
+        
+        .choice-card:nth-child(1) { transform: rotate(-3deg); }
+        .choice-card:nth-child(2) { transform: rotate(2deg); margin-top: 15px;}
+        .choice-card:nth-child(3) { transform: rotate(-2deg); }
+
+        .choice-header {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 5px;
+            text-transform: uppercase;
+            position: relative;
+            z-index: 4;
+        }
+
+        .choice-desc {
+            font-size: 0.9rem;
+            line-height: 1.4;
+            flex-grow: 1;
+            position: relative;
+            z-index: 4;
+        }
+
+        /* 印章 - 改进版 */
+        .stamp-mark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-15deg);
+            
+            font-family: 'Special Elite', monospace;
+            font-size: 3rem;
+            font-weight: 900;
+            color: #b01818;
+            
+            border: 6px solid #b01818;
+            border-radius: 8px;
+            padding: 10px 20px;
+            
+            opacity: 0;
+            pointer-events: none;
+            text-transform: uppercase;
+            white-space: nowrap;
+            mix-blend-mode: multiply;
+            
+            mask-image: url("data:image/svg+xml,%3Csvg width='200' height='100' viewBox='0 0 200 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.6'/%3E%3C/svg%3E");
+            -webkit-mask-image: url("data:image/svg+xml,%3Csvg width='200' height='100' viewBox='0 0 200 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.6'/%3E%3C/svg%3E");
+            z-index: 200;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; filter: blur(2px); }
+            to { opacity: 1; filter: blur(0); }
+        }
+
+        @keyframes stampAnim {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(1.5) rotate(-15deg); }
+            20% { opacity: 0.9; transform: translate(-50%, -50%) scale(1) rotate(-15deg); }
+            80% { opacity: 0.9; }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1) rotate(-15deg); }
+        }
+
+        .flash-stamp {
+            animation: stampAnim 0.8s forwards;
+        }
+
+        /* 咖啡渍装饰 */
+        .coffee-stain {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 5px solid rgba(60, 40, 20, 0.1);
+            box-shadow: 0 0 10px rgba(60, 40, 20, 0.1);
+            pointer-events: none;
+            z-index: 10;
+            top: 20px;
+            right: 40px;
+            filter: blur(1px);
+            mix-blend-mode: multiply;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="newspaper">
+        <!-- 全局变暗层，用于聚焦模式 -->
+        <div id="global-dimmer"></div>
+
+        <!-- 装饰：咖啡渍 -->
+        <div class="coffee-stain"></div>
+
+        <!-- 报头 -->
+        <header>
+            <div class="brand">THE DAILY TRUTH</div>
+            <div style="font-family: 'Playfair Display'; font-style:italic; font-size: 1.1rem; color: var(--ink-faded);">"Veritas Odit Moras - 真理厌恶拖延"</div>
+            <div class="meta-bar">
+                <span>VOL. MCDXXVIII</span>
+                <span id="date-display">OCT 24, 1928</span>
+                <span>PRICE: 5 CENTS</span>
+                <span>WEATHER: GLOOMY</span>
+            </div>
+        </header>
+
+        <!-- 内容区域 -->
+        <div class="content-wrapper">
+            <!-- 左侧新闻 -->
+            <div id="main-column">
+                <!-- 故事内容将动态注入这里 -->
+            </div>
+
+            <!-- 右侧数据 -->
+            <div id="side-column">
+                <div class="stat-box">
+                    <div class="stat-title">指标 MONITOR</div>
+                    <div class="stat-row">
+                        <span>CIRCULATION:</span>
+                        <span id="stat-subs">12,500</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>TRUST:</span>
+                        <span id="stat-cred">50%</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>PANIC:</span>
+                        <span id="stat-panic">15%</span>
+                    </div>
+                </div>
+
+                <div class="ad-space">
+                    <h3 style="font-family: 'Playfair Display'; font-weight:900; font-size:1.4rem; margin-bottom:5px; border-bottom:1px solid #aaa;">OLSOP'S TONIC</h3>
+                    <p style="font-size:0.9rem; font-style:italic;">"FOR THE NERVOUS MAN"</p>
+                    <p style="font-size:0.8rem; margin-top:5px;">A revolutionary blend of Radium & Whiskey.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部控制台 -->
+        <div id="editor-desk">
+            <!-- 按钮将动态注入这里 -->
+        </div>
+
+        <!-- 盖章效果层 -->
+        <div id="stamp-layer" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:200;"></div>
+    </div>
+
+    <script>
+        // --- 游戏状态 ---
+        const gameState = {
+            day: 1,
+            stats: {
+                subs: 12500, // 订阅量
+                cred: 50,    // 公信力
+                panic: 15    // 恐慌值
+            },
+            history: []
+        };
+
+        // --- 故事节点 (内容保持不变，仅展示部分结构) ---
+        const storyNodes = {
+            start: {
+                headline: "NEW EDITOR TAKES CHARGE OF 'THE TRUTH'",
+                subhead: "In a city shrouded in fog, truth is the most expensive luxury.",
+                image: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=2070&auto=format&fit=crop",
+                caption: "Newspaper HQ, photographed during yesterday's storm.",
+                body: "You dust off the mahogany desk. The previous editor died in an 'accidental' car crash, leaving you a crumbling newspaper and a tangled web of city power.<br><br>Outside, factory chimneys belch black smoke into the sky, and workers whisper in the streets about the upcoming mayoral election. Every decision you make will be printed on tomorrow's front page—becoming breakfast conversation, or the spark of a riot.<br><br>Your secretary places the first urgent dispatch on your desk. A beloved philanthropist has been found in a slum alley, surrounded by an overdose of illicit substances.",
+                choices: [
+                    {
+                        title: "EXPOSE THE TRUTH",
+                        desc: "Headline: 'MASK OF HYPOCRISY: THE DOUBLE LIFE'",
+                        effectText: "Credibility UP, but offends the elite.",
+                        next: "scandal_truth",
+                        impact: { subs: 500, cred: 10, panic: 5 }
+                    },
+                    {
+                        title: "SENSATIONALIZE",
+                        desc: "Headline: 'SLUM PHANTOM? WHO KILLED OUR ANGEL'",
+                        effectText: "Sales SURGE, Panic UP.",
+                        next: "scandal_sensation",
+                        impact: { subs: 2000, cred: -5, panic: 15 }
+                    },
+                    {
+                        title: "BURY THE STORY",
+                        desc: "Headline: 'NOTABLE CITIZEN PASSES AWAY'",
+                        effectText: "Safe, but sales flat.",
+                        next: "scandal_hide",
+                        impact: { subs: -200, cred: -5, panic: -5 }
+                    }
+                ]
+            },
+            scandal_truth: {
+                headline: "MASK OF HYPOCRISY: PHILANTHROPIST'S DARK SECRET",
+                subhead: "Autopsy reveals long-term substance abuse history.",
+                image: "https://images.unsplash.com/photo-1575320181282-9afab399332c?q=80&w=2070&auto=format&fit=crop",
+                caption: "Police cordoning off the alleyway crime scene.",
+                body: "Following our in-depth investigation, the dirty dealings behind the so-called 'Conscience of the City' have surfaced. Not only substance abuse, but evidence points to embezzlement of charity funds for illegal gambling.<br><br>The city is in uproar. Angry citizens gather outside his mansion. Though we've received anonymous threats, readers are beginning to trust 'The Truth' again.",
+                choices: [
+                    { title: "DIG DEEPER", desc: "Follow the money trail to the Mayor.", next: "mayor_involvement", impact: { subs: 800, cred: 15, panic: 10 } },
+                    { title: "PLAY IT SAFE", desc: "Pivot to human interest stories on protests.", next: "protest_story", impact: { subs: 300, cred: 5, panic: -5 } }
+                ]
+            },
+            scandal_sensation: {
+                headline: "SLUM PHANTOM? SERIAL KILLER ON THE LOOSE",
+                subhead: "Witnesses claim to have seen 'glowing eyes' in the dark.",
+                image: "https://images.unsplash.com/photo-1517260739337-6799d2df9c99?q=80&w=2069&auto=format&fit=crop",
+                caption: "Artist's impression of the alleged 'Phantom'.",
+                body: "Facts? Who cares about facts. People want a story. We packaged a common overdose into the prologue of a serial murder mystery.<br><br>The paper sold out in two hours. The streets are panicked; no one dares go out after dark. Your coffers are full, but the Police Chief is furious at the press conference.",
+                choices: [
+                    { title: "FUEL THE FIRE", desc: "Publish 'Expert' analysis on killers.", next: "panic_rises", impact: { subs: 3000, cred: -15, panic: 30 } },
+                    { title: "CALM DOWN", desc: "Report on increased police patrols.", next: "police_action", impact: { subs: 100, cred: 5, panic: -10 } }
+                ]
+            },
+            scandal_hide: {
+                headline: "NOTABLE CITIZEN PASSES AWAY PEACEFULLY",
+                subhead: "Family requests privacy during difficult times.",
+                image: null, 
+                body: "You chose the boring but safe angle. The report was like warm water—neither angering the elite nor interesting the readers.<br><br>Subscriptions dipped slightly. In this age of scarcity, mediocrity is a sin. But at least you'll sleep soundly tonight. Until the Mayor sends a cheque rewarding your 'integrity'.",
+                choices: [
+                    { title: "TAKE THE CHEQUE", desc: "It's for the survival of the paper.", next: "corrupt_start", impact: { subs: 0, cred: -20, panic: 0 } },
+                    { title: "REFUSE & EXPOSE", desc: "I cannot be bought!", next: "mayor_war", impact: { subs: 1000, cred: 20, panic: 10 } }
+                ]
+            },
+            // Endings / Continuations (Simplified for Demo)
+            mayor_involvement: { headline: "MONEY TRAIL LEADS TO CITY HALL?", subhead: "Forgotten invoice reveals corruption.", image: null, body: "You've kicked the hornet's nest. The presses are roaring; this will be a bombshell.", choices: [{title: "RESTART", desc: "End of Demo", next: "start", impact: {subs:0,cred:0,panic:0}}] },
+            protest_story: { headline: "VOICES FROM THE STREET", subhead: "Citizens demand answers.", image: null, body: "A touching piece on the betrayal felt by the common man. It wins hearts, but not wallets.", choices: [{title: "RESTART", desc: "End of Demo", next: "start", impact: {subs:0,cred:0,panic:0}}] },
+            panic_rises: { headline: "CITY IN TERROR: SECOND VICTIM?", subhead: "Rumors spread like wildfire.", image: null, body: "Shops close early. Vigilante groups form. You are rich, but the city is burning.", choices: [{title: "RESTART", desc: "End of Demo", next: "start", impact: {subs:0,cred:0,panic:0}}] },
+            police_action: { headline: "POLICE CHIEF PROMISES SAFETY", subhead: "Curfew enacted downtown.", image: null, body: "Order is restored, but the thrill is gone. Sales normalize.", choices: [{title: "RESTART", desc: "End of Demo", next: "start", impact: {subs:0,cred:0,panic:0}}] },
+            corrupt_start: { headline: "MAYOR'S APPROVAL RATINGS SOAR", subhead: "Exclusive interview.", image: null, body: "You are now their mouthpiece. The paper is rich, but your soul is poor.", choices: [{title: "RESTART", desc: "End of Demo", next: "start", impact: {subs:0,cred:0,panic:0}}] },
+            mayor_war: { headline: "EDITOR REFUSES BRIBE!", subhead: "War declared on corruption.", image: null, body: "It's dangerous, but it's the right thing to do.", choices: [{title: "RESTART", desc: "End of Demo", next: "start", impact: {subs:0,cred:0,panic:0}}] }
+        };
+
+        // --- 引擎逻辑 ---
+
+        const mainCol = document.getElementById('main-column');
+        const editorDesk = document.getElementById('editor-desk');
+        const stampLayer = document.getElementById('stamp-layer');
+        const globalDimmer = document.getElementById('global-dimmer');
+
+        // 交互：聚焦模式
+        editorDesk.addEventListener('mouseenter', () => {
+            globalDimmer.style.opacity = '1';
+        });
+
+        editorDesk.addEventListener('mouseleave', () => {
+            globalDimmer.style.opacity = '0';
+        });
+
+        function updateStats() {
+            animateValue("stat-subs", gameState.stats.subs);
+            animateValue("stat-cred", gameState.stats.cred, "%");
+            animateValue("stat-panic", gameState.stats.panic, "%");
+        }
+
+        function animateValue(id, end, suffix = "") {
+            const obj = document.getElementById(id);
+            const start = parseInt(obj.innerHTML.replace(/,/g, ''));
+            if (start === end) return;
+            let current = start;
+            const step = end > start ? Math.ceil((end - start) / 20) : Math.floor((end - start) / 20);
+            const timer = setInterval(() => {
+                current += step;
+                if ((step > 0 && current >= end) || (step < 0 && current <= end)) { current = end; clearInterval(timer); }
+                obj.innerHTML = current.toLocaleString() + suffix;
+                if(id === "stat-panic") obj.style.color = current > 50 ? "red" : "black";
+            }, 30);
+        }
+
+        function renderScene(sceneId) {
+            const scene = storyNodes[sceneId];
+            editorDesk.innerHTML = '';
+
+            const article = document.createElement('article');
+            article.className = 'article';
+            
+            let html = `<h1 class="headline">${scene.headline}</h1>`;
+            if (scene.subhead) html += `<div class="subhead">${scene.subhead}</div>`;
+            if (scene.image) {
+                html += `
+                    <div class="news-photo-container">
+                        <div class="news-photo" style="background-image: url('${scene.image}')"></div>
+                    </div>
+                    ${scene.caption ? `<div class="photo-caption">▲ ${scene.caption}</div>` : ''}
+                `;
+            }
+            const bodyWithDropCap = `<p class="drop-cap">${scene.body.replace('<br><br>', '</p><p>')}</p>`;
+            html += `<div class="body-text">${bodyWithDropCap}</div>`;
+            html += `<div style="text-align:center; margin: 30px 0; color:var(--ink-faded); letter-spacing:5px;">***</div>`;
+
+            article.innerHTML = html;
+            mainCol.prepend(article);
+
+            scene.choices.forEach((choice, index) => {
+                const card = document.createElement('div');
+                card.className = 'choice-card';
+                // 添加聚光灯层
+                card.innerHTML = `
+                    <div class="spotlight-overlay"></div>
+                    <div class="choice-header">${choice.title}</div>
+                    <div class="choice-desc">${choice.desc}</div>
+                    <div style="font-size:0.75rem; color:#666; border-top:1px dashed #999; padding-top:5px; margin-top:10px; position:relative; z-index:4;">
+                        IMPACT: ${choice.effectText || "Unknown"}
+                    </div>
+                `;
+                card.onclick = () => makeChoice(choice, card);
+                editorDesk.appendChild(card);
+            });
+        }
+
+        function makeChoice(choice, cardElement) {
+            const rect = cardElement.getBoundingClientRect();
+            const stamp = document.createElement('div');
+            stamp.className = 'stamp-mark flash-stamp';
+            stamp.innerText = "PRINT IT";
+            stamp.style.top = (rect.top + rect.height/2) + 'px';
+            stamp.style.left = (rect.left + rect.width/2) + 'px';
+            stampLayer.appendChild(stamp);
+
+            if (choice.impact) {
+                gameState.stats.subs += choice.impact.subs;
+                gameState.stats.cred += choice.impact.cred;
+                gameState.stats.panic += choice.impact.panic;
+                updateStats();
+            }
+
+            // 选择后恢复亮度
+            globalDimmer.style.opacity = '0';
+
+            setTimeout(() => {
+                stamp.remove();
+                if (choice.next === 'start') {
+                    mainCol.innerHTML = '';
+                    gameState.stats = { subs: 12500, cred: 50, panic: 15 };
+                    updateStats();
+                }
+                renderScene(choice.next);
+            }, 800);
+        }
+
+        renderScene('start');
+    </script>
+</body>
+</html>
