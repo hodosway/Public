@@ -2,7 +2,6 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <!-- 关键：禁止用户缩放，确保 App 般的体验 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>PROJECT ECHO: OVERDRIVE</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -30,11 +29,10 @@
             background-color: var(--void-black);
             color: var(--pure-white);
             font-family: 'Oswald', sans-serif;
-            /* 关键修复：使用 dvh 适应移动端动态地址栏 */
             height: 100dvh; 
             width: 100vw;
             margin: 0;
-            overflow: hidden; /* 禁止 Body 滚动，只允许内部区域滚动 */
+            overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -43,21 +41,46 @@
                 linear-gradient(45deg, #111 25%, transparent 25%, transparent 75%, #111 75%, #111);
             background-size: 60px 60px;
             background-position: 0 0, 30px 30px;
-            position: fixed; /* 锁死页面防止整体回弹 */
+            position: fixed;
             inset: 0;
+        }
+
+        /* --- 故障特效 (Glitch Effect) --- */
+        @keyframes glitch-anim-1 {
+            0% { clip-path: inset(20% 0 80% 0); transform: translate(-2px, 1px); }
+            20% { clip-path: inset(60% 0 10% 0); transform: translate(2px, -1px); }
+            40% { clip-path: inset(40% 0 50% 0); transform: translate(-2px, 2px); }
+            60% { clip-path: inset(80% 0 5% 0); transform: translate(2px, -2px); }
+            80% { clip-path: inset(10% 0 70% 0); transform: translate(-1px, 1px); }
+            100% { clip-path: inset(30% 0 50% 0); transform: translate(1px, -1px); }
+        }
+
+        @keyframes glitch-flash {
+            0% { filter: invert(0); }
+            50% { filter: invert(1) contrast(2); }
+            100% { filter: invert(0); }
+        }
+
+        .glitch-active body {
+            animation: glitch-flash 0.2s cubic-bezier(0.1, 0.7, 1.0, 0.1) 2;
+        }
+
+        .glitch-active #game-ui {
+            animation: glitch-anim-1 0.2s infinite linear;
+            filter: drop-shadow(-2px 0 red) drop-shadow(2px 0 blue);
         }
 
         /* --- 主菜单 --- */
         #main-menu {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(8, 8, 8, 0.98); /* 加深背景防止透视干扰 */
-            z-index: 1000;
+            background: rgba(8, 8, 8, 0.98);
+            z-index: 2000;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            transition: transform 0.4s cubic-bezier(0.7, 0, 0.3, 1);
+            transition: transform 0.6s cubic-bezier(0.7, 0, 0.3, 1);
         }
 
         #main-menu.hidden { transform: translateY(-100%); }
@@ -92,6 +115,47 @@
 
         .start-btn:active { transform: scale(0.95); }
 
+        /* --- 开场独白 (Intro Sequence) --- */
+        #intro-sequence {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000;
+            z-index: 1500;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+        }
+
+        #intro-sequence.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .intro-text {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.5rem;
+            color: var(--acid-green);
+            max-width: 800px;
+            line-height: 1.6;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+        }
+        
+        .skip-hint {
+            font-family: 'Teko', sans-serif;
+            color: #666;
+            font-size: 1.2rem;
+            animation: blink 1s infinite;
+            cursor: pointer;
+            border: 1px solid #333;
+            padding: 5px 15px;
+        }
+
         /* --- 游戏主界面 --- */
         #game-ui {
             width: 95%;
@@ -102,6 +166,7 @@
             grid-template-rows: 80px 1fr;
             gap: 15px;
             position: relative;
+            transition: filter 0.1s;
         }
 
         /* 顶部栏 */
@@ -114,7 +179,7 @@
             padding: 0 30px;
             clip-path: polygon(0 0, 100% 0, 100% 80%, 98% 100%, 0 100%);
             border-bottom: 4px solid var(--acid-green);
-            min-height: 0; /* 防止 Flex 子项溢出 */
+            min-height: 0;
         }
 
         .header-title {
@@ -148,7 +213,7 @@
             flex-direction: column;
             gap: 20px;
             border-left: 4px solid var(--acid-green);
-            overflow-y: auto; /* 允许侧边栏内容滚动 */
+            overflow-y: auto;
         }
 
         .avatar-container {
@@ -197,18 +262,18 @@
             border-top: 2px solid #333;
             position: relative;
             clip-path: polygon(0 0, 98% 0, 100% 5%, 100% 100%, 0 100%);
-            min-height: 0; /* 关键：允许 Flex 子项滚动 */
+            min-height: 0;
         }
 
-        /* 日志区 - 滚动核心 */
+        /* 日志区 */
         #log-stream {
-            flex: 1; /* 占据剩余空间 */
-            overflow-y: auto; /* 允许内部滚动 */
+            flex: 1;
+            overflow-y: auto;
             padding: 30px;
             display: flex;
             flex-direction: column;
             gap: 15px;
-            -webkit-overflow-scrolling: touch; /* iOS 丝滑滚动 */
+            -webkit-overflow-scrolling: touch;
             scroll-behavior: smooth;
         }
 
@@ -217,13 +282,15 @@
             border-left: 4px solid #444;
             padding: 15px;
             font-size: 1.1rem;
-            line-height: 1.5;
-            flex-shrink: 0; /* 防止内容被压缩 */
+            line-height: 1.6;
+            flex-shrink: 0;
+            color: #ddd;
         }
 
         .log-node.active {
             border-left-color: var(--acid-green);
             background: linear-gradient(90deg, rgba(211, 255, 0, 0.05), transparent);
+            color: #fff;
         }
 
         .time-tag {
@@ -231,9 +298,9 @@
             font-size: 1.1rem; margin-bottom: 5px;
         }
 
-        /* 底部控制区 - 固定在底部 */
+        /* 底部控制区 */
         #control-deck {
-            flex-shrink: 0; /* 防止被压缩 */
+            flex-shrink: 0;
             padding: 20px;
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -267,15 +334,17 @@
         }
         .cmd-btn:active .cmd-title { color: #000; }
 
-        .cmd-desc { font-size: 0.9rem; color: #aaa; margin-top: 5px; }
+        .cmd-desc { font-size: 0.9rem; color: #aaa; margin-top: 5px; line-height: 1.2; }
         .cmd-btn:active .cmd-desc { color: #333; }
 
-        /* --- 手机端完美适配 --- */
+        /* --- 手机端适配 --- */
         @media (max-width: 768px) {
             .game-logo { font-size: 3.5rem; }
             .start-btn { font-size: 1.8rem; padding: 10px 40px; }
+            
+            #intro-sequence { padding: 20px; }
+            .intro-text { font-size: 1.1rem; }
 
-            /* 容器改为 Flex 列布局，更稳健 */
             #game-ui {
                 width: 100%; height: 100%;
                 display: flex;
@@ -283,9 +352,8 @@
                 gap: 0;
             }
 
-            /* 头部紧凑化 */
             header {
-                flex: 0 0 50px; /* 固定高度 */
+                flex: 0 0 50px;
                 clip-path: none;
                 padding: 0 10px;
                 border-bottom: 2px solid var(--acid-green);
@@ -293,9 +361,8 @@
             .header-title { font-size: 1.4rem; }
             .nav-btn { padding: 2px 10px; font-size: 0.8rem; }
 
-            /* 侧边栏紧凑化 */
             aside { 
-                flex: 0 0 auto; /* 高度由内容决定 */
+                flex: 0 0 auto;
                 flex-direction: row; 
                 padding: 10px; 
                 clip-path: none; 
@@ -303,36 +370,34 @@
                 border-bottom: 1px solid #333;
                 align-items: center;
                 gap: 10px;
-                overflow-x: auto; /* 允许横向滑动 */
+                overflow-x: auto;
             }
             .avatar-container { width: 50px; height: 50px; border: 1px solid #333; }
             .info-group {
                 display: flex;
                 gap: 15px;
-                overflow-x: auto; /* 数据条也可以横向滑 */
+                overflow-x: auto;
                 padding-right: 10px;
             }
             .info-group > div { min-width: 100px; margin-bottom: 0 !important; }
             .stat-label { font-size: 0.9rem; }
             .bar-track { height: 6px; transform: skew(-10deg); }
 
-            /* 主内容区域撑满剩余空间 */
             main {
-                flex: 1; /* 占据剩余所有高度 */
+                flex: 1;
                 clip-path: none;
-                min-height: 0; /* 关键：允许内部滚动 */
+                min-height: 0;
             }
 
             #log-stream { padding: 15px; }
             .log-node { padding: 10px; font-size: 1rem; }
 
-            /* 底部按钮改为单列堆叠 */
             #control-deck {
                 flex: 0 0 auto;
                 grid-template-columns: 1fr;
                 gap: 8px;
                 padding: 10px;
-                padding-bottom: 25px; /* 适配 iPhone 底部横条 */
+                padding-bottom: 25px; /* iOS Safe Area */
                 border-top: 1px solid var(--acid-green);
             }
             .cmd-btn { padding: 10px; }
@@ -340,7 +405,6 @@
             .cmd-desc { font-size: 0.8rem; }
         }
 
-        /* 打字机光标 */
         .typing::after {
             content: '_';
             animation: blink 0.5s infinite;
@@ -352,11 +416,20 @@
 </head>
 <body>
 
+    <!-- 故障效果层 (CSS Class 触发) -->
+    <div id="glitch-layer"></div>
+
     <!-- 主菜单 -->
     <div id="main-menu">
         <div class="game-logo">PROJECT<br>ECHO</div>
-        <div style="font-size: 1rem; color: #888; margin-bottom: 30px; letter-spacing: 2px; text-align: center;">ZERO DEGREE OBSERVATION<br>MOBILE OPTIMIZED</div>
-        <button class="start-btn" onclick="startGame()">START MISSION</button>
+        <div style="font-size: 1rem; color: #888; margin-bottom: 30px; letter-spacing: 2px; text-align: center;">SURVEILLANCE & MANIPULATION<br>SYSTEM ONLINE</div>
+        <button class="start-btn" onclick="startIntro()">INITIATE</button>
+    </div>
+
+    <!-- 开场独白层 -->
+    <div id="intro-sequence">
+        <div class="intro-text" id="intro-text-container"></div>
+        <div class="skip-hint" onclick="finishIntro()">[ CLICK TO PROCEED ]</div>
     </div>
 
     <!-- 游戏主界面 -->
@@ -377,17 +450,17 @@
             
             <div class="info-group">
                 <div style="margin-bottom: 15px;">
-                    <div class="stat-label"><span>PSYCHE</span> <span id="val-sanity">80%</span></div>
+                    <div class="stat-label"><span>PSYCHE (SAN)</span> <span id="val-sanity">80%</span></div>
                     <div class="bar-track"><div id="bar-sanity" class="bar-fill"></div></div>
                 </div>
 
                 <div style="margin-bottom: 15px;">
-                    <div class="stat-label"><span>SOCIAL</span> <span id="val-social">60%</span></div>
+                    <div class="stat-label"><span>SOCIAL (REP)</span> <span id="val-social">60%</span></div>
                     <div class="bar-track"><div id="bar-social" class="bar-fill"></div></div>
                 </div>
 
                 <div>
-                    <div class="stat-label"><span>CAREER</span> <span id="val-career">50%</span></div>
+                    <div class="stat-label"><span>CAREER ($)</span> <span id="val-career">50%</span></div>
                     <div class="bar-track"><div id="bar-career" class="bar-fill"></div></div>
                 </div>
             </div>
@@ -400,8 +473,7 @@
     </div>
 
     <script>
-        // --- 音乐与音效系统 ---
-        // 替换为你自己的音乐链接
+        // --- BGM 系统 ---
         const BGM_URL = "https://cdn.pixabay.com/download/audio/2022/03/24/audio_076e0774a3.mp3?filename=sci-fi-cyberpunk-trailer-110587.mp3";
         let bgm = new Audio(BGM_URL);
         bgm.loop = true;
@@ -409,16 +481,25 @@
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-        function startGame() {
+        // 启动流程：菜单 -> 独白 -> 游戏
+        function startIntro() {
             document.getElementById('main-menu').classList.add('hidden');
-            if(audioCtx.state === 'suspended') audioCtx.resume();
+            document.getElementById('intro-sequence').classList.add('active');
             
+            // 解锁音频
+            if(audioCtx.state === 'suspended') audioCtx.resume();
             bgm.play().then(() => {
                 document.getElementById('bgm-toggle').textContent = "♪ ON";
             }).catch(e => console.log("Audio play blocked", e));
-
             playSound('startup');
-            
+
+            // 播放开场文字动画
+            const introText = "欢迎，操作员。<br><br>你的权限已解锁。你的目标是编号 4402 的市民：廖忠一。他只是这座城市里数百万数据节点中的一个：平庸、疲惫、且脆弱。<br><br>但在这里，你不是观察者，你是神。通过操控网络舆论的流向，你可以轻易地捧红他，或者... 毁灭他。<br><br>记住，对系统而言，他是数据。但对他而言，这是他仅有的一次人生。";
+            typeWriter(document.getElementById('intro-text-container'), introText, 30);
+        }
+
+        function finishIntro() {
+            document.getElementById('intro-sequence').classList.remove('active');
             if(logStream.innerHTML === "") {
                 renderScene('start');
             }
@@ -469,62 +550,88 @@
                 gain.gain.linearRampToValueAtTime(0, now + 0.5);
                 osc.start(now);
                 osc.stop(now + 0.5);
+            } else if (type === 'glitch') { // 故障音效
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(50, now);
+                osc.frequency.linearRampToValueAtTime(800, now + 0.2);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
             }
         }
 
-        // --- 游戏逻辑 ---
+        // --- 触发故障特效 ---
+        function triggerGlitch() {
+            document.body.classList.add('glitch-active');
+            playSound('glitch');
+            setTimeout(() => {
+                document.body.classList.remove('glitch-active');
+            }, 600); // 持续 0.6秒
+        }
+
+        // --- 游戏剧本 (扩充版) ---
         let stats = { sanity: 80, social: 60, career: 50 };
         const storyNodes = {
             start: {
                 time: "08:31:04",
-                text: "样本进入地铁 3 号线。睡眠不足引发浅层休克。老年乘客停留 45s 未获让座。周边设备记录中。视频上传至流媒体，标签：#巨婴 #素质。<br><br>系统介入建议：",
+                text: "地铁三号线，空气中弥漫着潮湿雨伞和廉价早点的味道。廖忠一拖着沉重的身体挤进了车厢角落。他昨晚为了赶项目进度，一直加班到凌晨四点。此刻，他几乎是昏迷般地跌坐在了爱心专座上。<br><br>他没看到那个刚上车、扶着腰的老人。但他闭眼皱眉的样子，被对面举起的三个手机镜头完整记录了下来。半小时后，一段名为《装睡的巨婴》的视频开始在同城流传。",
                 choices: [
-                    { title: "SUPPRESS", desc: "降权/限流/封锁关键词", impact: { sanity: 0, social: 0, career: 0 }, next: "act_suppress" },
-                    { title: "INFLAME", desc: "标签重定向：#冷漠 / 增加推送", impact: { sanity: -15, social: -20, career: 0 }, next: "act_inflame" },
-                    { title: "REFRAME", desc: "披露考勤数据 / 标签：#过劳", impact: { sanity: -5, social: 10, career: -15 }, next: "act_reframe" }
+                    { title: "冷处理", desc: "降权、限流，让视频沉下去。", impact: { sanity: 0, social: 0, career: 0 }, next: "act_suppress" },
+                    { title: "煽动情绪", desc: "把标签改成 #冷漠一代，推给愤怒的中年用户。", impact: { sanity: -15, social: -20, career: 0, glitch: true }, next: "act_inflame" },
+                    { title: "反转叙事", desc: "放出他的加班打卡记录，打造 #社畜的悲哀。", impact: { sanity: -5, social: 10, career: -15 }, next: "act_reframe" }
                 ]
             },
             act_suppress: {
                 time: "12:15:00",
-                text: "干预生效。播放量锁定 203。样本未察觉异常。14:00 部门主管发布业绩预警通告。",
-                choices: [{ title: "MONITOR", desc: "继续当前观测频率", impact: {}, next: "incident_work" }]
+                text: "算法介入很及时。视频播放量卡在了 203 次，没掀起任何波澜。廖忠一对此一无所知，他准时打卡，像往常一样在工位上开始了一天的劳作。但他不知道的是，部门主管刚刚在工作群里发了一条：“最近有些人精神面貌很差，影响团队氛围。”",
+                choices: [{ title: "继续监测", desc: "保持静默观察。", impact: {}, next: "incident_night_store" }]
             },
             act_inflame: {
                 time: "12:15:00",
-                text: "播放量突破 50 万。样本收到 322 条攻击性信息。心率均值 95bpm。办公区视线压力指数上升。",
-                choices: [{ title: "LOG DATA", desc: "归档压力数值", impact: {}, next: "incident_work" }]
+                text: "视频爆了。播放量突破 50 万。廖忠一刚打开手机，就被 322 条私信轰炸了。“去死吧”、“这就是家教”... 每一个字都像钉子一样扎进眼睛。他在厕所隔间里躲了半小时，出来时，整个办公区的视线都像探照灯一样刺眼。心率监测显示：120bpm。",
+                choices: [{ title: "记录数据", desc: "归档当前压力数值。", impact: {}, next: "incident_night_store" }]
             },
             act_reframe: {
                 time: "12:15:00",
-                text: "舆论转移。样本获 1.2 万点赞。HR 启动风险评估，判定存在“潜在负面影响”。",
-                choices: [{ title: "UPDATE", desc: "更新职级风险指数", impact: {}, next: "incident_work" }]
+                text: "舆论风向变了。评论区开始刷屏“心疼小哥”、“打工人何苦为难打工人”。廖忠一成了某种符号。但他还没来得及感动，就被 HR 叫进了办公室。理由是：“你的个人私事过多占用了公共资源，且暗示公司存在压榨行为。”",
+                choices: [{ title: "更新档案", desc: "更新职级风险指数。", impact: {}, next: "incident_night_store" }]
+            },
+            incident_night_store: {
+                time: "21:40:00",
+                text: "下班路上，廖忠一走进了那家全家便利店。他买了一份关东煮，甚至奢侈地加了两串贡丸。他坐在落地窗前发呆，手机屏幕亮了又灭。那是他母亲发来的语音：“忠一啊，最近身体怎么样？工作顺利吗？”<br>他举起手指悬在语音键上，犹豫了很久。",
+                choices: [
+                    { title: "不回复", desc: "由于极度疲惫，他选择锁屏回家。", impact: { sanity: -5, social: 0, career: 0 }, next: "incident_work" },
+                    { title: "报喜不报忧", desc: "回了一条：“挺好的，刚吃完大餐。”", impact: { sanity: 5, social: 5, career: 0 }, next: "incident_work" }
+                ]
             },
             incident_work: {
                 time: "11-15 19:42",
-                text: "样本在私密群组发送文本：“管理层逻辑漏洞严重。”<br>监测到群成员 A 截屏，目标发送对象：高层。<br>窗口期剩余 10 秒。",
+                text: "一周后。高压环境下，廖忠一在一个只有四人的私密群组里发了一句牢骚：“管理层这次的决策逻辑简直是脑瘫。”<br>这是一句普通的发泄。但系统监测到，群成员 [同事A] 正在进行截屏操作，且目标发送对象是公司副总。<br>拦截窗口期仅剩 5 秒。",
                 choices: [
-                    { title: "BLOCK", desc: "模拟丢包 / 销毁数据", impact: { sanity: 5, social: 0, career: 0 }, next: "res_saved" },
-                    { title: "BROADCAST", desc: "重定向至全员邮件", impact: { sanity: -30, social: -10, career: -100 }, next: "res_fired" },
-                    { title: "IGNORE", desc: "允许数据自然流动", impact: { sanity: -10, social: -5, career: -30 }, next: "res_leaked" }
+                    { title: "数据阻断", desc: "制造网络丢包，让截图发送失败。", impact: { sanity: 5, social: 0, career: 0 }, next: "res_saved" },
+                    { title: "全域广播", desc: "不仅放行，还将截图转发至全员邮件。", impact: { sanity: -30, social: -10, career: -100, glitch: true }, next: "res_fired" },
+                    { title: "无视", desc: "这是人类社交的自然淘汰。", impact: { sanity: -10, social: -5, career: -30, glitch: true }, next: "res_leaked" }
                 ]
             },
-            res_saved: { time: "20:00:00", text: "阻断成功。截屏未发出。样本摄入加热食品后返所。", choices: [{ title: "NEXT CYCLE", desc: "加载后续事件", impact: {}, next: "incident_street" }] },
-            res_leaked: { time: "DAY +01", text: "接受人事谈话。绩效奖金归零。工位调整至盲区。", choices: [{ title: "NEXT CYCLE", desc: "加载后续事件", impact: {}, next: "incident_street" }] },
-            res_fired: { time: "DAY +01", text: "劳动合同解除。样本离开建筑。无人员道别。", choices: [{ title: "NEXT CYCLE", desc: "加载后续事件", impact: {}, next: "incident_street" }] },
+            res_saved: { time: "20:00:00", text: "红色的感叹号出现在同事 A 的屏幕上。他试了几次都没发出去，最后怕被发现，骂骂咧咧地删掉了图片。廖忠一并不知道，自己刚刚在悬崖边走了一遭。", choices: [{ title: "下个周期", desc: "加载后续事件。", impact: {}, next: "incident_street" }] },
+            res_leaked: { time: "DAY +01", text: "第二天一早，廖忠一就被移出了项目组。没有正式通报，但年度绩效奖金已归零。他的工位被调整到了靠近厕所的监控盲区。同事们开始像躲避瘟疫一样避开他。", choices: [{ title: "下个周期", desc: "加载后续事件。", impact: {}, next: "incident_street" }] },
+            res_fired: { time: "DAY +01", text: "炸锅了。那封邮件成了全公司的笑话。廖忠一被保安“请”出了大楼。没有赔偿，只有羞辱。他抱着纸箱站在CBD的十字路口，像个透明的幽灵。", choices: [{ title: "下个周期", desc: "加载后续事件。", impact: {}, next: "incident_street" }] },
             incident_street: {
                 time: "11-20 23:11",
-                text: "遭遇动物虐待事件。样本与醉酒个体冲突。对方倒地，软组织挫伤。<br>定性分析：",
+                text: "深夜，老旧小区的巷子里传来猫的惨叫声。廖忠一看到两个醉酒的混混正在踢打一只流浪猫。那是他经常喂的那只橘猫。<br>愤怒冲昏了头脑，他冲上去推开了其中一人。混混倒地时头磕到了砖块，血流了出来。<br>警察正在赶来。这里是监控死角。如何定性这起事件？",
                 choices: [
-                    { title: "SYNTHESIZE", desc: "生成热成像证据 / 判定正当防卫", impact: { sanity: 10, social: 20, career: 0 }, next: "end_hero" },
-                    { title: "EDIT", desc: "保留推搡画面 / 定性互殴", impact: { sanity: -50, social: -50, career: -50 }, next: "end_ruin" },
-                    { title: "IGNORE", desc: "不进行干预", impact: { sanity: -5, social: -5, career: -5 }, next: "end_mediocre" }
+                    { title: "证据合成", desc: "伪造卫星热成像，判定正当防卫。", impact: { sanity: 10, social: 20, career: 0 }, next: "end_hero" },
+                    { title: "恶意剪辑", desc: "仅保留推人画面，定性为故意伤害。", impact: { sanity: -50, social: -50, career: -50, glitch: true }, next: "end_ruin" },
+                    { title: "不作为", desc: "不进行数据干预，大概率定性互殴。", impact: { sanity: -5, social: -5, career: -5 }, next: "end_mediocre" }
                 ]
             },
-            end_hero: { time: "ARCHIVE", text: "获得短暂关注。精神稳定。状态：存续。<br>观察结束。", choices: [{ title: "RESET", desc: "清除缓存数据", impact: {}, next: "start" }] },
-            end_ruin: { time: "ARCHIVE", text: "社会链接断裂。经济切断。样本在数据流中消失。<br>观察结束。", choices: [{ title: "RESET", desc: "清除缓存数据", impact: {}, next: "start" }] },
-            end_mediocre: { time: "ARCHIVE", text: "支付行政罚款。轨迹回归基准线。<br>观察结束。", choices: [{ title: "RESET", desc: "清除缓存数据", impact: {}, next: "start" }] }
+            end_hero: { time: "ARCHIVE", text: "【结局：微光】<br>警方采纳了证据。廖忠一被认定为见义勇为。虽然生活依然艰难，房租依然要涨，但那天晚上，他抱着那只幸存的猫，睡了个安稳觉。<br>观察结束。", choices: [{ title: "重置系统", desc: "清除缓存数据。", impact: {}, next: "start" }] },
+            end_ruin: { time: "ARCHIVE", text: "【结局：坠落】<br>舆论一边倒地指责他是“暴力狂”。工作丢了，房东退租了。他在互联网上社会性死亡，在现实中也没了立足之地。他消失在了那个寒冷的冬夜。<br>观察结束。", choices: [{ title: "重置系统", desc: "清除缓存数据。", impact: {}, next: "start" }] },
+            end_mediocre: { time: "ARCHIVE", text: "【结局：尘埃】<br>赔了医药费，拘留了三天。出来后，他像什么都没发生一样，继续挤地铁，继续加班。只是眼神里最后一点光也熄灭了。<br>观察结束。", choices: [{ title: "重置系统", desc: "清除缓存数据。", impact: {}, next: "start" }] }
         };
 
+        // --- 逻辑引擎 ---
         const logStream = document.getElementById('log-stream');
         const controlDeck = document.getElementById('control-deck');
 
@@ -538,7 +645,7 @@
             document.getElementById('val-career').innerText = stats.career + "%";
         }
 
-        async function typeWriter(element, text) {
+        async function typeWriter(element, text, speed = 20) {
             element.classList.add('typing');
             let buffer = "";
             let inTag = false;
@@ -548,14 +655,12 @@
                 if(char === ">") inTag = false;
                 if(!inTag) {
                     element.innerHTML = buffer;
-                    // 确保一直滚动到底部
                     logStream.scrollTop = logStream.scrollHeight;
-                    if(Math.random() > 0.5) playSound('type');
-                    await new Promise(r => setTimeout(r, 20));
+                    if(Math.random() > 0.5 && speed < 50) playSound('type');
+                    await new Promise(r => setTimeout(r, speed));
                 }
             }
             element.classList.remove('typing');
-            // 最后再强制滚动一次
             logStream.scrollTop = logStream.scrollHeight;
         }
 
@@ -584,6 +689,12 @@
                 btn.innerHTML = `<div class="cmd-title">${choice.title}</div><div class="cmd-desc">${choice.desc}</div>`;
                 btn.onclick = () => {
                     playSound('click');
+                    
+                    // 触发故障特效
+                    if(choice.impact && choice.impact.glitch) {
+                        triggerGlitch();
+                    }
+
                     if (choice.impact) {
                         stats.sanity += choice.impact.sanity || 0;
                         stats.social += choice.impact.social || 0;
@@ -594,7 +705,6 @@
                 };
                 controlDeck.appendChild(btn);
             });
-            // 生成按钮后也确保可见
             logStream.scrollTop = logStream.scrollHeight;
         }
 
