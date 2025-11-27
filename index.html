@@ -2,732 +2,559 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>真理日报：编辑室</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>回响计划：样本观察</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Special+Elite&display=swap" rel="stylesheet">
-    
+    <!-- 像素字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Zpix&family=VT323&display=swap" rel="stylesheet">
+    <!-- 引入 Zpix 中文像素字体，如果加载失败会回退到系统字体，但保持像素化渲染 -->
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap');
+
         :root {
-            /* 更陈旧的纸张颜色 */
-            --paper-bg: #e8e4d3; 
-            --paper-shadow: #c0b8a0;
+            /* 零度配色方案：冷、净、硬 */
+            --bg-deep: #0a0b10;     /* 深空黑 */
+            --bg-panel: #14161f;    /* 面板灰 */
+            --bg-slot: #1c202b;     /* 插槽深灰 */
             
-            /* 模拟不完全黑的油墨 */
-            --ink-color: #2b2b2b;
-            --ink-faded: #4a4a4a;
+            --text-main: #e2e8f0;   /* 冰白 */
+            --text-dim: #64748b;    /* 暗灰 */
             
-            --accent-red: #8a1c1c;
-            --border-color: #a8a08a;
+            --accent-cyan: #00f0ff; /* 终端青 (高亮) */
+            --accent-red: #ff2a6d;  /* 警告红 */
+            --accent-yellow: #ffcc00; /* 注意黄 */
+            
+            --border-color: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            /* 保持像素风的锐利 */
+            image-rendering: pixelated; 
         }
 
         body {
-            background-color: #1a1510;
-            color: var(--ink-color);
-            font-family: 'Noto Serif SC', serif;
-            margin: 0;
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            font-family: 'Noto Sans SC', 'VT323', sans-serif; /* 优先中文无衬线，兼容像素感 */
             height: 100vh;
+            width: 100vw;
+            margin: 0;
             overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
-            /* 深色木纹背景 */
+            
+            /* 极简网格背景 */
             background-image: 
-                radial-gradient(circle at 50% 50%, rgba(0,0,0,0.2), rgba(0,0,0,0.8)),
-                url('https://www.transparenttextures.com/patterns/wood-pattern.png');
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
         }
 
-        /* 报纸主体 */
-        #newspaper {
-            width: 1000px;
-            height: 96vh;
-            background-color: var(--paper-bg);
-            /* 复杂的纸张纹理叠加 */
-            background-image: 
-                /* 边缘暗角 */
-                radial-gradient(circle at center, transparent 60%, rgba(139, 119, 90, 0.2) 100%),
-                /* 噪点纹理 */
-                url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
-            
-            box-shadow: 
-                0 1px 1px rgba(0,0,0,0.1),
-                0 10px 30px rgba(0,0,0,0.5),
-                inset 0 0 60px rgba(160, 140, 100, 0.2); /* 内部陈旧感 */
-            
+        /* 容器：就像一个悬浮的平板 */
+        #terminal-container {
+            width: 95%;
+            height: 90%;
+            max-width: 1000px;
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            grid-template-rows: 50px 1fr;
+            box-shadow: 0 0 40px rgba(0,0,0,0.5);
+        }
+
+        /* 顶部状态栏 */
+        header {
+            grid-column: 1 / 3;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .header-title {
+            font-size: 1rem;
+            letter-spacing: 2px;
+            font-weight: bold;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-red);
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        /* 左侧面板：档案 */
+        aside {
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
-            position: relative;
-            border-left: 1px solid #d4cfc0;
-            border-right: 1px solid #ccc;
+            gap: 20px;
+            background: rgba(0,0,0,0.1);
         }
 
-        /* 全局变暗遮罩层 */
-        #global-dimmer {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(2px);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.5s ease;
-            z-index: 50;
-        }
-
-        /* 报头区域 */
-        header {
-            border-bottom: 4px double var(--ink-color);
-            padding: 20px 40px 10px 40px;
-            text-align: center;
-            flex-shrink: 0;
-            position: relative;
-            z-index: 10; /* 保证在变暗层下，但在内容上 */
-            background-color: var(--paper-bg); /* 防止文字重叠 */
-        }
-
-        .brand {
-            font-family: 'Playfair Display', serif;
-            font-size: 4rem;
-            font-weight: 900;
-            letter-spacing: -2px;
-            text-transform: uppercase;
-            line-height: 0.9;
-            margin-bottom: 10px;
-            color: #1a1a1a;
-            /* 模拟墨水边缘渗漏 */
-            text-shadow: 0 0 1px rgba(0,0,0,0.3); 
-            transform: scaleY(1.1); /*稍微拉长字体，更有年代感*/
-        }
-
-        .meta-bar {
-            border-top: 1px solid var(--ink-color);
-            border-bottom: 1px solid var(--ink-color);
-            padding: 4px 0;
-            margin-top: 15px;
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.85rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-family: 'Special Elite', monospace; /* 打字机字体 */
-        }
-
-        /* 主要内容布局 */
-        .content-wrapper {
-            display: flex;
-            flex-grow: 1;
-            overflow: hidden;
-            position: relative;
-            /* 为底部浮动桌子留出滚动空间 */
-            padding-bottom: 200px; 
-        }
-
-        /* 报纸折痕阴影 (视觉欺骗) */
-        .content-wrapper::before {
-            content: '';
-            position: absolute;
-            left: 75%; /* 侧边栏分割处 */
-            top: 0; bottom: 0;
-            width: 20px;
-            background: linear-gradient(to right, rgba(0,0,0,0.05), transparent);
-            pointer-events: none;
-            z-index: 5;
-        }
-
-        /* 左侧：新闻栏 */
-        #main-column {
-            flex: 3;
-            padding: 30px 40px;
-            overflow-y: auto;
-            border-right: 1px solid var(--border-color);
-            position: relative;
-        }
-        
-        #main-column::-webkit-scrollbar { width: 4px; }
-        #main-column::-webkit-scrollbar-thumb { background-color: #aaa; }
-
-        /* 文章样式 */
-        .article {
-            margin-bottom: 40px;
-            animation: fadeIn 1s cubic-bezier(0.2, 0.8, 0.2, 1);
-            filter: sepia(0.2); /* 整体微黄 */
-        }
-
-        .headline {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.2rem;
-            font-weight: 700;
-            line-height: 1.05;
-            margin-bottom: 12px;
-            text-align: left;
-            color: #111;
-            /* 标题墨迹感 */
-            text-shadow: 0.5px 0.5px 0px rgba(0,0,0,0.1); 
-        }
-
-        .subhead {
-            font-family: 'Noto Serif SC', serif;
-            font-style: italic;
-            font-weight: 700;
-            color: var(--ink-faded);
-            margin-bottom: 20px;
-            padding-left: 15px;
-            border-left: 4px solid var(--ink-color);
-            font-size: 1.1rem;
-        }
-
-        .body-text {
-            font-size: 1.05rem;
-            line-height: 1.6;
-            text-align: justify;
-            columns: 2;
-            column-gap: 25px;
-            column-rule: 1px solid #dcdcdc; /* 栏间线 */
-            color: #222;
-        }
-
-        .body-text p {
-            margin-bottom: 15px;
-            text-indent: 0; /* 报纸通常首段不缩进，或者首字下沉 */
-        }
-        
-        .drop-cap::first-letter {
-            float: left;
-            font-size: 3.8rem;
-            line-height: 0.75;
-            font-weight: 900;
-            margin-right: 10px;
-            margin-top: 5px;
-            color: var(--ink-color);
-            font-family: 'Playfair Display', serif;
-        }
-
-        /* 图片半色调处理 - 模拟报纸印刷网点 */
-        .news-photo-container {
+        .avatar-box {
             width: 100%;
-            height: 220px;
-            margin-bottom: 15px;
-            border: 1px solid #333;
-            padding: 3px; /* 留白边框 */
-            background: #fff;
+            aspect-ratio: 1/1;
+            background: var(--bg-slot);
+            border: 1px solid var(--border-color);
             position: relative;
             overflow: hidden;
+            cursor: pointer;
+            transition: border-color 0.3s;
         }
         
-        .news-photo {
+        .avatar-box:hover {
+            border-color: var(--accent-cyan);
+        }
+
+        .avatar-box img {
             width: 100%;
             height: 100%;
-            background-size: cover;
-            background-position: center;
-            /* 关键滤镜组合：高对比+灰度+老照片色调 */
-            filter: grayscale(100%) contrast(150%) brightness(0.9) sepia(30%);
-            /* 叠加半色调网点 */
-            mask-image: radial-gradient(circle, black 1px, transparent 1.5px);
-            mask-size: 4px 4px; /* 网点大小 */
-            -webkit-mask-image: radial-gradient(circle, black 1px, transparent 1.5px);
-            -webkit-mask-size: 4px 4px;
-        }
-
-        .photo-caption {
-            font-size: 0.75rem;
-            color: var(--ink-faded);
-            margin-bottom: 20px;
-            text-align: center;
-            font-family: 'Special Elite', monospace;
-            font-weight: bold;
-        }
-
-        /* 右侧：侧边栏 */
-        #side-column {
-            flex: 1;
-            padding: 20px 25px;
-            background-color: transparent; /* 与主色一致 */
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-        }
-
-        .stat-box {
-            border: 2px solid var(--ink-color);
-            padding: 12px;
-            background: #fdfbf7; /* 稍白的纸 */
-            box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
-            transform: rotate(0.5deg); /* 稍微手工粘贴的感觉 */
-        }
-        
-        .stat-title {
-            text-align: center;
-            font-weight: 900;
-            border-bottom: 2px solid var(--ink-color);
-            margin-bottom: 12px;
-            padding-bottom: 5px;
-            text-transform: uppercase;
-            font-family: 'Playfair Display', serif;
-            font-size: 1.1rem;
-        }
-        
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-family: 'Special Elite', monospace;
-            font-size: 0.9rem;
-            color: #333;
-        }
-
-        .ad-space {
-            border: 1px dashed var(--ink-faded);
-            padding: 15px;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+            object-fit: cover;
+            filter: grayscale(100%) contrast(1.1); /* 冷漠的黑白照 */
             opacity: 0.8;
-            font-family: 'Noto Serif SC', serif;
-        }
-
-        /* === 底部：编辑决策台 (UI 核心修改处) ===
-           现在是悬浮的、半透明的、底部模糊的容器
-        */
-        #editor-desk {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 280px;
-            
-            /* 背景渐变：从完全透明过渡到深色木纹 */
-            background: linear-gradient(to bottom, 
-                rgba(26, 21, 16, 0) 0%, 
-                rgba(26, 21, 16, 0.4) 20%, 
-                rgba(26, 21, 16, 0.9) 50%,
-                #1a1510 100%);
-            
-            /* 关键：高斯模糊背景，使下方报纸文字模糊 */
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            
-            /* 视觉上的分割不再突兀，而是柔和的过渡 */
-            border-top: none; 
-            
-            display: flex;
-            gap: 40px;
-            align-items: center;
-            justify-content: center;
-            padding-top: 40px; /* 给渐变留出空间 */
-            z-index: 100;
-            transition: all 0.3s ease;
         }
         
-        /* 决策卡片 - 索引卡风格 */
-        .choice-card {
-            background-color: #fffef0;
-            width: 280px;
-            height: 180px;
-            padding: 20px;
-            box-shadow: 
-                0 2px 4px rgba(0,0,0,0.2),
-                0 10px 20px rgba(0,0,0,0.3);
-            border-radius: 2px;
-            cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            border: none;
-            font-family: 'Special Elite', monospace;
-            color: #333;
-            overflow: hidden; /* 为了聚光灯效果 */
-        }
-
-        /* 模拟卡片纸纹 */
-        .choice-card::after {
-            content: '';
+        .avatar-overlay {
             position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
-            pointer-events: none;
-            z-index: 2;
-        }
-
-        /* 聚光灯层 (默认隐藏) */
-        .spotlight-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.6) 0%, rgba(255, 240, 200, 0) 70%);
+            bottom: 0; left: 0; width: 100%;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            font-size: 0.7rem;
+            text-align: center;
+            padding: 4px;
             opacity: 0;
             transition: opacity 0.2s;
-            mix-blend-mode: soft-light;
-            pointer-events: none;
-            z-index: 3;
-        }
-
-        /* 选中状态动画 */
-        .choice-card:hover {
-            transform: translateY(-20px) scale(1.05) rotate(0deg) !important;
-            box-shadow: 0 30px 50px rgba(0,0,0,0.7);
-            background-color: #fff;
-            z-index: 150;
-            /* 杂边抖动动画 */
-            animation: nervous-shake 0.3s infinite;
-        }
-
-        .choice-card:hover .spotlight-overlay {
-            opacity: 1;
-        }
-
-        /* 抖动动画关键帧 */
-        @keyframes nervous-shake {
-            0% { transform: translateY(-20px) scale(1.05) rotate(0deg); }
-            25% { transform: translateY(-20px) scale(1.05) rotate(0.5deg); }
-            50% { transform: translateY(-20px) scale(1.05) rotate(-0.5deg); }
-            75% { transform: translateY(-20px) scale(1.05) rotate(0.2deg); }
-            100% { transform: translateY(-20px) scale(1.05) rotate(0deg); }
         }
         
-        .choice-card:nth-child(1) { transform: rotate(-3deg); }
-        .choice-card:nth-child(2) { transform: rotate(2deg); margin-top: 15px;}
-        .choice-card:nth-child(3) { transform: rotate(-2deg); }
+        .avatar-box:hover .avatar-overlay { opacity: 1; }
 
-        .choice-header {
-            font-weight: bold;
+        .info-label {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            margin-bottom: 4px;
+        }
+
+        .info-value {
             font-size: 1.1rem;
-            margin-bottom: 8px;
-            border-bottom: 2px solid #333;
-            padding-bottom: 5px;
-            text-transform: uppercase;
-            position: relative;
-            z-index: 4;
+            font-weight: bold;
+            color: var(--text-main);
+            margin-bottom: 12px;
         }
 
-        .choice-desc {
-            font-size: 0.9rem;
-            line-height: 1.4;
-            flex-grow: 1;
-            position: relative;
-            z-index: 4;
-        }
-
-        /* 印章 - 改进版 */
-        .stamp-mark {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-15deg);
-            
-            font-family: 'Special Elite', monospace;
-            font-size: 3rem;
-            font-weight: 900;
-            color: #b01818;
-            
-            border: 6px solid #b01818;
-            border-radius: 8px;
-            padding: 10px 20px;
-            
-            opacity: 0;
-            pointer-events: none;
-            text-transform: uppercase;
-            white-space: nowrap;
-            mix-blend-mode: multiply;
-            
-            mask-image: url("data:image/svg+xml,%3Csvg width='200' height='100' viewBox='0 0 200 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.6'/%3E%3C/svg%3E");
-            -webkit-mask-image: url("data:image/svg+xml,%3Csvg width='200' height='100' viewBox='0 0 200 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.6'/%3E%3C/svg%3E");
-            z-index: 200;
+        /* 数据条 (Clean style) */
+        .stat-bar-bg {
+            height: 6px;
+            background: var(--bg-slot);
+            width: 100%;
+            margin-bottom: 20px;
+            overflow: hidden;
         }
         
-        @keyframes fadeIn {
-            from { opacity: 0; filter: blur(2px); }
-            to { opacity: 1; filter: blur(0); }
+        .stat-bar-fill {
+            height: 100%;
+            background: var(--accent-cyan);
+            width: 50%;
+            transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
-        @keyframes stampAnim {
-            0% { opacity: 0; transform: translate(-50%, -50%) scale(1.5) rotate(-15deg); }
-            20% { opacity: 0.9; transform: translate(-50%, -50%) scale(1) rotate(-15deg); }
-            80% { opacity: 0.9; }
-            100% { opacity: 0; transform: translate(-50%, -50%) scale(1) rotate(-15deg); }
+        /* 主内容区 */
+        main {
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: var(--bg-panel);
+            position: relative;
         }
 
-        .flash-stamp {
-            animation: stampAnim 0.8s forwards;
+        /* 日志流 */
+        #log-stream {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 30px;
+            font-family: 'Noto Sans SC', sans-serif;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
+        
+        /* 隐藏滚动条但保留功能 */
+        #log-stream::-webkit-scrollbar { width: 4px; }
+        #log-stream::-webkit-scrollbar-thumb { background: var(--border-color); }
 
-        /* 咖啡渍装饰 */
-        .coffee-stain {
+        .log-node {
+            border-left: 2px solid var(--border-color);
+            padding-left: 20px;
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
+            position: relative;
+        }
+        
+        .log-node::before {
+            content: '';
             position: absolute;
-            width: 150px;
-            height: 150px;
+            left: -5px; top: 0;
+            width: 8px; height: 8px;
+            background: var(--bg-panel);
+            border: 2px solid var(--text-dim);
             border-radius: 50%;
-            border: 5px solid rgba(60, 40, 20, 0.1);
-            box-shadow: 0 0 10px rgba(60, 40, 20, 0.1);
-            pointer-events: none;
-            z-index: 10;
-            top: 20px;
-            right: 40px;
-            filter: blur(1px);
-            mix-blend-mode: multiply;
         }
 
+        .log-node.active {
+            border-left-color: var(--accent-cyan);
+        }
+        .log-node.active::before {
+            border-color: var(--accent-cyan);
+            background: var(--accent-cyan);
+        }
+
+        @keyframes fadeIn { to { opacity: 1; } }
+
+        .time-stamp {
+            font-family: 'VT323', monospace;
+            color: var(--accent-cyan);
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            opacity: 0.8;
+        }
+
+        .log-content {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #d1d5db;
+        }
+
+        /* 底部控制台 */
+        #control-deck {
+            border-top: 1px solid var(--border-color);
+            background: rgba(0,0,0,0.2);
+            padding: 20px 30px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 严格的三列布局 */
+            gap: 20px;
+            min-height: 140px;
+        }
+
+        .cmd-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-dim);
+            padding: 15px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .cmd-btn:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            background: rgba(0, 240, 255, 0.05);
+        }
+
+        .cmd-btn::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 0%; height: 2px;
+            background: var(--accent-cyan);
+            transition: width 0.2s;
+        }
+        .cmd-btn:hover::after { width: 100%; }
+
+        .cmd-title {
+            font-size: 1rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .cmd-desc {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+
+        /* 手机适配 */
+        @media (max-width: 768px) {
+            #terminal-container {
+                width: 100%;
+                height: 100%;
+                border: none;
+                grid-template-columns: 1fr;
+                grid-template-rows: 50px auto 1fr auto;
+            }
+
+            aside {
+                flex-direction: row;
+                padding: 15px;
+                gap: 15px;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                align-items: center;
+            }
+
+            .avatar-box {
+                width: 60px;
+                height: 60px;
+                margin-bottom: 0;
+            }
+
+            .info-group {
+                display: flex;
+                gap: 15px;
+                flex: 1;
+                justify-content: space-around;
+            }
+            
+            .stat-wrapper {
+                flex: 1;
+            }
+            
+            .stat-bar-bg { margin-bottom: 0; }
+            .info-label { margin-bottom: 2px; }
+            .info-value { display: none; } /* 手机端隐藏具体数值，只看条 */
+
+            #control-deck {
+                grid-template-columns: 1fr;
+                padding: 15px;
+                gap: 10px;
+            }
+            
+            .cmd-btn {
+                padding: 12px;
+                min-height: auto;
+            }
+        }
     </style>
 </head>
 <body>
 
-    <div id="newspaper">
-        <!-- 全局变暗层，用于聚焦模式 -->
-        <div id="global-dimmer"></div>
-
-        <!-- 装饰：咖啡渍 -->
-        <div class="coffee-stain"></div>
-
-        <!-- 报头 -->
+    <div id="terminal-container">
+        <!-- 顶栏 -->
         <header>
-            <div class="brand">THE DAILY TRUTH</div>
-            <div style="font-family: 'Playfair Display'; font-style:italic; font-size: 1.1rem; color: var(--ink-faded);">"Veritas Odit Moras - 真理厌恶拖延"</div>
-            <div class="meta-bar">
-                <span>VOL. MCDXXVIII</span>
-                <span id="date-display">OCT 24, 1928</span>
-                <span>PRICE: 5 CENTS</span>
-                <span>WEATHER: GLOOMY</span>
+            <div class="header-title">Project Echo :: 样本观察记录</div>
+            <div style="font-size: 0.8rem; color: var(--text-dim);">
+                <span class="status-dot"></span> 实时数据流
             </div>
         </header>
 
-        <!-- 内容区域 -->
-        <div class="content-wrapper">
-            <!-- 左侧新闻 -->
-            <div id="main-column">
-                <!-- 故事内容将动态注入这里 -->
+        <!-- 侧边栏：样本信息 -->
+        <aside>
+            <div class="avatar-box" onclick="document.getElementById('file-input').click()">
+                <img id="avatar-img" src="https://images.unsplash.com/photo-1595152772835-219674b2a8a6?q=80&w=500&auto=format&fit=crop" alt="样本头像">
+                <div class="avatar-overlay">更换样本</div>
+                <input type="file" id="file-input" style="display: none;" accept="image/*" onchange="loadAvatar(this)">
             </div>
-
-            <!-- 右侧数据 -->
-            <div id="side-column">
-                <div class="stat-box">
-                    <div class="stat-title">指标 MONITOR</div>
-                    <div class="stat-row">
-                        <span>CIRCULATION:</span>
-                        <span id="stat-subs">12,500</span>
-                    </div>
-                    <div class="stat-row">
-                        <span>TRUST:</span>
-                        <span id="stat-cred">50%</span>
-                    </div>
-                    <div class="stat-row">
-                        <span>PANIC:</span>
-                        <span id="stat-panic">15%</span>
+            
+            <div class="info-group">
+                <div class="stat-wrapper">
+                    <div class="info-label">样本编号</div>
+                    <div class="info-value">LIAO-Z-01</div>
+                    
+                    <div class="info-label">心理阈值</div>
+                    <div class="stat-bar-bg">
+                        <div id="bar-sanity" class="stat-bar-fill" style="width: 80%;"></div>
                     </div>
                 </div>
 
-                <div class="ad-space">
-                    <h3 style="font-family: 'Playfair Display'; font-weight:900; font-size:1.4rem; margin-bottom:5px; border-bottom:1px solid #aaa;">OLSOP'S TONIC</h3>
-                    <p style="font-size:0.9rem; font-style:italic;">"FOR THE NERVOUS MAN"</p>
-                    <p style="font-size:0.8rem; margin-top:5px;">A revolutionary blend of Radium & Whiskey.</p>
+                <div class="stat-wrapper">
+                    <div class="info-label">社会链接</div>
+                    <div class="stat-bar-bg">
+                        <div id="bar-social" class="stat-bar-fill" style="width: 60%; background-color: var(--accent-yellow);"></div>
+                    </div>
+                </div>
+
+                <div class="stat-wrapper">
+                    <div class="info-label">资源/职级</div>
+                    <div class="stat-bar-bg">
+                        <div id="bar-career" class="stat-bar-fill" style="width: 50%; background-color: #fff;"></div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </aside>
 
-        <!-- 底部控制台 -->
-        <div id="editor-desk">
-            <!-- 按钮将动态注入这里 -->
-        </div>
+        <!-- 主内容 -->
+        <main>
+            <div id="log-stream">
+                <!-- 动态日志生成区 -->
+            </div>
 
-        <!-- 盖章效果层 -->
-        <div id="stamp-layer" style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:200;"></div>
+            <div id="control-deck">
+                <!-- 动态按钮区 -->
+            </div>
+        </main>
     </div>
 
     <script>
-        // --- 游戏状态 ---
-        const gameState = {
-            day: 1,
-            stats: {
-                subs: 12500, // 订阅量
-                cred: 50,    // 公信力
-                panic: 15    // 恐慌值
-            },
-            history: []
+        // --- 核心数据 ---
+        let stats = { 
+            sanity: 80,   // 心理
+            social: 60,   // 社会
+            career: 50    // 职业
         };
 
-        // --- 故事节点 (内容保持不变，仅展示部分结构) ---
+        // --- 零度写作剧本 (Zero Degree Script) ---
         const storyNodes = {
             start: {
-                headline: "NEW EDITOR TAKES CHARGE OF 'THE TRUTH'",
-                subhead: "In a city shrouded in fog, truth is the most expensive luxury.",
-                image: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=2070&auto=format&fit=crop",
-                caption: "Newspaper HQ, photographed during yesterday's storm.",
-                body: "You dust off the mahogany desk. The previous editor died in an 'accidental' car crash, leaving you a crumbling newspaper and a tangled web of city power.<br><br>Outside, factory chimneys belch black smoke into the sky, and workers whisper in the streets about the upcoming mayoral election. Every decision you make will be printed on tomorrow's front page—becoming breakfast conversation, or the spark of a riot.<br><br>Your secretary places the first urgent dispatch on your desk. A beloved philanthropist has been found in a slum alley, surrounded by an overdose of illicit substances.",
+                time: "08:31:04",
+                text: "样本进入地铁 3 号线车厢。由于昨夜 4 小时 12 分钟的睡眠不足，样本在座位上进入浅层睡眠状态。一名老年乘客在其面前停留 45 秒。随后，周围乘客启动摄像设备。30 分钟后，相关视频上传至流媒体平台，标签包含“素质”、“教育缺失”。<br><br>系统建议操作：",
                 choices: [
-                    {
-                        title: "EXPOSE THE TRUTH",
-                        desc: "Headline: 'MASK OF HYPOCRISY: THE DOUBLE LIFE'",
-                        effectText: "Credibility UP, but offends the elite.",
-                        next: "scandal_truth",
-                        impact: { subs: 500, cred: 10, panic: 5 }
-                    },
-                    {
-                        title: "SENSATIONALIZE",
-                        desc: "Headline: 'SLUM PHANTOM? WHO KILLED OUR ANGEL'",
-                        effectText: "Sales SURGE, Panic UP.",
-                        next: "scandal_sensation",
-                        impact: { subs: 2000, cred: -5, panic: 15 }
-                    },
-                    {
-                        title: "BURY THE STORY",
-                        desc: "Headline: 'NOTABLE CITIZEN PASSES AWAY'",
-                        effectText: "Safe, but sales flat.",
-                        next: "scandal_hide",
-                        impact: { subs: -200, cred: -5, panic: -5 }
-                    }
+                    { title: "权重降级", desc: "降低视频流推广权重。限制关键词索引。", impact: { sanity: 0, social: 0, career: 0 }, next: "act_suppress" },
+                    { title: "标签重定向", desc: "关联标签：#冷漠。增加推送频次。", impact: { sanity: -15, social: -20, career: 0 }, next: "act_inflame" },
+                    { title: "数据披露", desc: "公开样本考勤记录。关联标签：#过劳。", impact: { sanity: -5, social: 10, career: -15 }, next: "act_reframe" }
                 ]
             },
-            scandal_truth: {
-                headline: "MASK OF HYPOCRISY: PHILANTHROPIST'S DARK SECRET",
-                subhead: "Autopsy reveals long-term substance abuse history.",
-                image: "https://images.unsplash.com/photo-1575320181282-9afab399332c?q=80&w=2070&auto=format&fit=crop",
-                caption: "Police cordoning off the alleyway crime scene.",
-                body: "Following our in-depth investigation, the dirty dealings behind the so-called 'Conscience of the City' have surfaced. Not only substance abuse, but evidence points to embezzlement of charity funds for illegal gambling.<br><br>The city is in uproar. Angry citizens gather outside his mansion. Though we've received anonymous threats, readers are beginning to trust 'The Truth' again.",
+            act_suppress: {
+                time: "12:15:00",
+                text: "干预生效。视频播放量停留在 203 次。样本准时打卡。未察觉异常。14:00，部门主管在工作群发布全员通告，指出团队整体业绩未达标。",
+                choices: [{ title: "继续监测", desc: "保持当前观测频率。", impact: {}, next: "incident_work" }]
+            },
+            act_inflame: {
+                time: "12:15:00",
+                text: "视频播放量突破 50 万。样本私人通讯终端收到 322 条陌生信息。样本心率均值上升至 95bpm。办公区域内，三名同事视线在样本身上停留超过 5 秒。",
+                choices: [{ title: "记录数据", desc: "归档当前压力数值。", impact: {}, next: "incident_work" }]
+            },
+            act_reframe: {
+                time: "12:15:00",
+                text: "舆论焦点转移。样本获得 1.2 万次点赞。HR 部门启动风险评估程序，判定样本存在“潜在负面影响”。",
+                choices: [{ title: "记录数据", desc: "更新职级风险指数。", impact: {}, next: "incident_work" }]
+            },
+            incident_work: {
+                time: "11-15 19:42",
+                text: "样本在 4 人私密群组发送文本：“管理层决策逻辑存在严重漏洞。”<br>监测到群成员 A 进行截屏操作，目标发送对象为公司高层。<br>窗口期剩余 10 秒。",
                 choices: [
-                    { title: "DIG DEEPER", desc: "Follow the money trail to the Mayor.", next: "mayor_involvement", impact: { subs: 800, cred: 15, panic: 10 } },
-                    { title: "PLAY IT SAFE", desc: "Pivot to human interest stories on protests.", next: "protest_story", impact: { subs: 300, cred: 5, panic: -5 } }
+                    { title: "数据阻断", desc: "模拟网络丢包，销毁传输数据。", impact: { sanity: 5, social: 0, career: 0 }, next: "res_saved" },
+                    { title: "全域广播", desc: "将截图重定向至全员邮件列表。", impact: { sanity: -30, social: -10, career: -100 }, next: "res_fired" },
+                    { title: "无操作", desc: "允许数据自然流动。", impact: { sanity: -10, social: -5, career: -30 }, next: "res_leaked" }
                 ]
             },
-            scandal_sensation: {
-                headline: "SLUM PHANTOM? SERIAL KILLER ON THE LOOSE",
-                subhead: "Witnesses claim to have seen 'glowing eyes' in the dark.",
-                image: "https://images.unsplash.com/photo-1517260739337-6799d2df9c99?q=80&w=2069&auto=format&fit=crop",
-                caption: "Artist's impression of the alleged 'Phantom'.",
-                body: "Facts? Who cares about facts. People want a story. We packaged a common overdose into the prologue of a serial murder mystery.<br><br>The paper sold out in two hours. The streets are panicked; no one dares go out after dark. Your coffers are full, but the Police Chief is furious at the press conference.",
+            res_saved: { time: "20:00:00", text: "数据传输失败。截屏文件未发出。样本在便利店购买加热食品，随后返回住所。", choices: [{ title: "下个周期", desc: "加载后续事件。", impact: {}, next: "incident_street" }] },
+            res_leaked: { time: "DAY +01", text: "样本接受人事谈话。年度绩效奖金归零。工位调整至监控盲区。", choices: [{ title: "下个周期", desc: "加载后续事件。", impact: {}, next: "incident_street" }] },
+            res_fired: { time: "DAY +01", text: "样本劳动合同即时解除。样本携带私人物品离开建筑。无人员进行道别。", choices: [{ title: "下个周期", desc: "加载后续事件。", impact: {}, next: "incident_street" }] },
+            incident_street: {
+                time: "11-20 23:11",
+                text: "样本在非监控区域遭遇动物虐待事件。样本与两名醉酒个体发生肢体冲突。对方倒地，体表出现软组织挫伤。<br>定性分析：",
                 choices: [
-                    { title: "FUEL THE FIRE", desc: "Publish 'Expert' analysis on killers.", next: "panic_rises", impact: { subs: 3000, cred: -15, panic: 30 } },
-                    { title: "CALM DOWN", desc: "Report on increased police patrols.", next: "police_action", impact: { subs: 100, cred: 5, panic: -10 } }
+                    { title: "证据合成", desc: "生成热成像轨迹，判定正当防卫。", impact: { sanity: 10, social: 20, career: 0 }, next: "end_hero" },
+                    { title: "片面剪辑", desc: "仅保留推搡画面。定性：互殴。", impact: { sanity: -50, social: -50, career: -50 }, next: "end_ruin" },
+                    { title: "忽略", desc: "不进行数据干预。", impact: { sanity: -5, social: -5, career: -5 }, next: "end_mediocre" }
                 ]
             },
-            scandal_hide: {
-                headline: "NOTABLE CITIZEN PASSES AWAY PEACEFULLY",
-                subhead: "Family requests privacy during difficult times.",
-                image: null, 
-                body: "You chose the boring but safe angle. The report was like warm water—neither angering the elite nor interesting the readers.<br><br>Subscriptions dipped slightly. In this age of scarcity, mediocrity is a sin. But at least you'll sleep soundly tonight. Until the Mayor sends a cheque rewarding your 'integrity'.",
-                choices: [
-                    { title: "TAKE THE CHEQUE", desc: "It's for the survival of the paper.", next: "corrupt_start", impact: { subs: 0, cred: -20, panic: 0 } },
-                    { title: "REFUSE & EXPOSE", desc: "I cannot be bought!", next: "mayor_war", impact: { subs: 1000, cred: 20, panic: 10 } }
-                ]
-            },
-            // Endings / Continuations (Simplified for Demo)
-            mayor_involvement: { headline: "MONEY TRAIL LEADS TO CITY HALL?", subhead: "Forgotten invoice reveals corruption.", image: null, body: "You've kicked the hornet's nest. The presses are roaring; this will be a bombshell.", choices: [{title: "RESTART", desc: "End of Demo", next: "start", impact: {subs:0,cred:0,panic:0}}] },
-            protest_story: { headline: "VOICES FROM THE STREET", subhead: "Citizens demand answers.", image: null, body: "A touching piece on the betrayal felt by the common man. It wins hearts, but not wallets.", choices: [{title: "RESTART", desc: "End of Demo", next: "start", impact: {subs:0,cred:0,panic:0}}] },
-            panic_rises: { headline: "CITY IN TERROR: SECOND VICTIM?", subhead: "Rumors spread like wildfire.", image: null, body: "Shops close early. Vigilante groups form. You are rich, but the city is burning.", choices: [{title: "RESTART", desc: "End of Demo", next: "start", impact: {subs:0,cred:0,panic:0}}] },
-            police_action: { headline: "POLICE CHIEF PROMISES SAFETY", subhead: "Curfew enacted downtown.", image: null, body: "Order is restored, but the thrill is gone. Sales normalize.", choices: [{title: "RESTART", desc: "End of Demo", next: "start", impact: {subs:0,cred:0,panic:0}}] },
-            corrupt_start: { headline: "MAYOR'S APPROVAL RATINGS SOAR", subhead: "Exclusive interview.", image: null, body: "You are now their mouthpiece. The paper is rich, but your soul is poor.", choices: [{title: "RESTART", desc: "End of Demo", next: "start", impact: {subs:0,cred:0,panic:0}}] },
-            mayor_war: { headline: "EDITOR REFUSES BRIBE!", subhead: "War declared on corruption.", image: null, body: "It's dangerous, but it's the right thing to do.", choices: [{title: "RESTART", desc: "End of Demo", next: "start", impact: {subs:0,cred:0,panic:0}}] }
+            end_hero: { time: "ARCHIVE", text: "样本获得短暂社会关注。精神状态稳定。生存状态：存续。<br>观察结束。", choices: [{ title: "重置", desc: "清除缓存数据。", impact: {}, next: "start" }] },
+            end_ruin: { time: "ARCHIVE", text: "样本社会链接断裂。经济来源切断。样本在城市数据流中消失。<br>观察结束。", choices: [{ title: "重置", desc: "清除缓存数据。", impact: {}, next: "start" }] },
+            end_mediocre: { time: "ARCHIVE", text: "样本支付行政罚款。生活轨迹回归基准线。<br>观察结束。", choices: [{ title: "重置", desc: "清除缓存数据。", impact: {}, next: "start" }] }
         };
 
-        // --- 引擎逻辑 ---
+        // --- 逻辑引擎 ---
+        const logStream = document.getElementById('log-stream');
+        const controlDeck = document.getElementById('control-deck');
 
-        const mainCol = document.getElementById('main-column');
-        const editorDesk = document.getElementById('editor-desk');
-        const stampLayer = document.getElementById('stamp-layer');
-        const globalDimmer = document.getElementById('global-dimmer');
-
-        // 交互：聚焦模式
-        editorDesk.addEventListener('mouseenter', () => {
-            globalDimmer.style.opacity = '1';
-        });
-
-        editorDesk.addEventListener('mouseleave', () => {
-            globalDimmer.style.opacity = '0';
-        });
-
-        function updateStats() {
-            animateValue("stat-subs", gameState.stats.subs);
-            animateValue("stat-cred", gameState.stats.cred, "%");
-            animateValue("stat-panic", gameState.stats.panic, "%");
+        function updateUI() {
+            document.getElementById('bar-sanity').style.width = Math.max(0, Math.min(100, stats.sanity)) + '%';
+            document.getElementById('bar-social').style.width = Math.max(0, Math.min(100, stats.social)) + '%';
+            document.getElementById('bar-career').style.width = Math.max(0, Math.min(100, stats.career)) + '%';
+            
+            // 动态颜色变化
+            const bars = [
+                {id: 'bar-sanity', val: stats.sanity},
+                {id: 'bar-social', val: stats.social},
+                {id: 'bar-career', val: stats.career}
+            ];
+            
+            bars.forEach(item => {
+                const el = document.getElementById(item.id);
+                if (item.val < 30) el.style.backgroundColor = 'var(--accent-red)';
+                else if (item.id === 'bar-social') el.style.backgroundColor = 'var(--accent-yellow)';
+                else if (item.id === 'bar-career') el.style.backgroundColor = '#fff';
+                else el.style.backgroundColor = 'var(--accent-cyan)';
+            });
         }
 
-        function animateValue(id, end, suffix = "") {
-            const obj = document.getElementById(id);
-            const start = parseInt(obj.innerHTML.replace(/,/g, ''));
-            if (start === end) return;
-            let current = start;
-            const step = end > start ? Math.ceil((end - start) / 20) : Math.floor((end - start) / 20);
-            const timer = setInterval(() => {
-                current += step;
-                if ((step > 0 && current >= end) || (step < 0 && current <= end)) { current = end; clearInterval(timer); }
-                obj.innerHTML = current.toLocaleString() + suffix;
-                if(id === "stat-panic") obj.style.color = current > 50 ? "red" : "black";
-            }, 30);
+        function createLogNode(scene) {
+            // 移除上一个节点的 active 状态
+            const prevNodes = document.querySelectorAll('.log-node');
+            prevNodes.forEach(n => n.classList.remove('active'));
+
+            const node = document.createElement('div');
+            node.className = 'log-node active';
+            node.innerHTML = `
+                <div class="time-stamp">[TIME: ${scene.time}]</div>
+                <div class="log-content">${scene.text}</div>
+            `;
+            logStream.appendChild(node);
+            
+            // 自动滚动到底部
+            setTimeout(() => {
+                logStream.scrollTop = logStream.scrollHeight;
+            }, 100);
         }
 
         function renderScene(sceneId) {
             const scene = storyNodes[sceneId];
-            editorDesk.innerHTML = '';
-
-            const article = document.createElement('article');
-            article.className = 'article';
             
-            let html = `<h1 class="headline">${scene.headline}</h1>`;
-            if (scene.subhead) html += `<div class="subhead">${scene.subhead}</div>`;
-            if (scene.image) {
-                html += `
-                    <div class="news-photo-container">
-                        <div class="news-photo" style="background-image: url('${scene.image}')"></div>
-                    </div>
-                    ${scene.caption ? `<div class="photo-caption">▲ ${scene.caption}</div>` : ''}
-                `;
+            if (sceneId === 'start') {
+                logStream.innerHTML = '';
+                stats = { sanity: 80, social: 60, career: 50 };
+                updateUI();
             }
-            const bodyWithDropCap = `<p class="drop-cap">${scene.body.replace('<br><br>', '</p><p>')}</p>`;
-            html += `<div class="body-text">${bodyWithDropCap}</div>`;
-            html += `<div style="text-align:center; margin: 30px 0; color:var(--ink-faded); letter-spacing:5px;">***</div>`;
 
-            article.innerHTML = html;
-            mainCol.prepend(article);
+            createLogNode(scene);
 
-            scene.choices.forEach((choice, index) => {
-                const card = document.createElement('div');
-                card.className = 'choice-card';
-                // 添加聚光灯层
-                card.innerHTML = `
-                    <div class="spotlight-overlay"></div>
-                    <div class="choice-header">${choice.title}</div>
-                    <div class="choice-desc">${choice.desc}</div>
-                    <div style="font-size:0.75rem; color:#666; border-top:1px dashed #999; padding-top:5px; margin-top:10px; position:relative; z-index:4;">
-                        IMPACT: ${choice.effectText || "Unknown"}
-                    </div>
+            controlDeck.innerHTML = '';
+            scene.choices.forEach(choice => {
+                const btn = document.createElement('button');
+                btn.className = 'cmd-btn';
+                btn.innerHTML = `
+                    <div class="cmd-title">${choice.title}</div>
+                    <div class="cmd-desc">${choice.desc}</div>
                 `;
-                card.onclick = () => makeChoice(choice, card);
-                editorDesk.appendChild(card);
+                btn.onclick = () => {
+                    if (choice.impact) {
+                        stats.sanity += choice.impact.sanity || 0;
+                        stats.social += choice.impact.social || 0;
+                        stats.career += choice.impact.career || 0;
+                        updateUI();
+                    }
+                    renderScene(choice.next);
+                };
+                controlDeck.appendChild(btn);
             });
         }
 
-        function makeChoice(choice, cardElement) {
-            const rect = cardElement.getBoundingClientRect();
-            const stamp = document.createElement('div');
-            stamp.className = 'stamp-mark flash-stamp';
-            stamp.innerText = "PRINT IT";
-            stamp.style.top = (rect.top + rect.height/2) + 'px';
-            stamp.style.left = (rect.left + rect.width/2) + 'px';
-            stampLayer.appendChild(stamp);
-
-            if (choice.impact) {
-                gameState.stats.subs += choice.impact.subs;
-                gameState.stats.cred += choice.impact.cred;
-                gameState.stats.panic += choice.impact.panic;
-                updateStats();
+        // 头像更换逻辑
+        function loadAvatar(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) { document.getElementById('avatar-img').src = e.target.result; }
+                reader.readAsDataURL(input.files[0]);
             }
-
-            // 选择后恢复亮度
-            globalDimmer.style.opacity = '0';
-
-            setTimeout(() => {
-                stamp.remove();
-                if (choice.next === 'start') {
-                    mainCol.innerHTML = '';
-                    gameState.stats = { subs: 12500, cred: 50, panic: 15 };
-                    updateStats();
-                }
-                renderScene(choice.next);
-            }, 800);
         }
 
+        // 启动
         renderScene('start');
+
     </script>
 </body>
 </html>
