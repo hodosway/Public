@@ -2,23 +2,22 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- 关键：禁止用户缩放，确保 App 般的体验 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>PROJECT ECHO: OVERDRIVE</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 引入力量感字体 Teko 和 Oswald -->
     <link href="https://fonts.googleapis.com/css2?family=Teko:wght@400;600;700&family=Oswald:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            /* 2XKO 风格配色 */
-            --acid-green: #D3FF00;  /* 核心酸性绿 */
-            --void-black: #080808;  /* 虚空黑 */
-            --panel-grey: #1a1a1a;  /* 面板灰 */
+            --acid-green: #D3FF00;
+            --void-black: #080808;
+            --panel-grey: #1a1a1a;
             --pure-white: #ffffff;
             --alert-red: #FF2E00;
             
-            --slant: polygon(0 0, 100% 0, 95% 100%, 0% 100%); /* 基础切角 */
-            --slant-btn: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); /* 按钮切角 */
+            --slant: polygon(0 0, 100% 0, 95% 100%, 0% 100%);
+            --slant-btn: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
         }
 
         * {
@@ -31,26 +30,28 @@
             background-color: var(--void-black);
             color: var(--pure-white);
             font-family: 'Oswald', sans-serif;
-            height: 100vh;
+            /* 关键修复：使用 dvh 适应移动端动态地址栏 */
+            height: 100dvh; 
             width: 100vw;
             margin: 0;
-            overflow: hidden;
+            overflow: hidden; /* 禁止 Body 滚动，只允许内部区域滚动 */
             display: flex;
             justify-content: center;
             align-items: center;
-            /* 动态背景纹理 */
             background-image: 
                 linear-gradient(45deg, #111 25%, transparent 25%, transparent 75%, #111 75%, #111),
                 linear-gradient(45deg, #111 25%, transparent 25%, transparent 75%, #111 75%, #111);
             background-size: 60px 60px;
             background-position: 0 0, 30px 30px;
+            position: fixed; /* 锁死页面防止整体回弹 */
+            inset: 0;
         }
 
-        /* --- 主菜单 (Start Screen) --- */
+        /* --- 主菜单 --- */
         #main-menu {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(8, 8, 8, 0.95);
+            background: rgba(8, 8, 8, 0.98); /* 加深背景防止透视干扰 */
             z-index: 1000;
             display: flex;
             flex-direction: column;
@@ -59,9 +60,7 @@
             transition: transform 0.4s cubic-bezier(0.7, 0, 0.3, 1);
         }
 
-        #main-menu.hidden {
-            transform: translateY(-100%);
-        }
+        #main-menu.hidden { transform: translateY(-100%); }
 
         .game-logo {
             font-family: 'Teko', sans-serif;
@@ -73,6 +72,7 @@
             margin-bottom: 20px;
             text-shadow: 4px 4px 0px var(--acid-green);
             transform: skew(-10deg);
+            text-align: center;
         }
 
         .start-btn {
@@ -88,16 +88,11 @@
             transition: all 0.2s;
             text-transform: uppercase;
             position: relative;
-            overflow: hidden;
         }
 
-        .start-btn:hover {
-            transform: scale(1.05) skew(-5deg);
-            background: var(--pure-white);
-            box-shadow: 0 0 20px var(--acid-green);
-        }
+        .start-btn:active { transform: scale(0.95); }
 
-        /* --- 游戏主界面容器 --- */
+        /* --- 游戏主界面 --- */
         #game-ui {
             width: 95%;
             height: 90%;
@@ -119,6 +114,7 @@
             padding: 0 30px;
             clip-path: polygon(0 0, 100% 0, 100% 80%, 98% 100%, 0 100%);
             border-bottom: 4px solid var(--acid-green);
+            min-height: 0; /* 防止 Flex 子项溢出 */
         }
 
         .header-title {
@@ -128,10 +124,7 @@
             text-transform: uppercase;
         }
 
-        .nav-group {
-            display: flex;
-            gap: 15px;
-        }
+        .nav-group { display: flex; gap: 15px; }
 
         .nav-btn {
             background: transparent;
@@ -143,12 +136,7 @@
             font-weight: bold;
             cursor: pointer;
             transform: skew(-10deg);
-            transition: all 0.2s;
-        }
-
-        .nav-btn:hover {
-            border-color: var(--acid-green);
-            color: var(--acid-green);
+            font-size: 1rem;
         }
 
         /* 左侧面板 */
@@ -160,6 +148,7 @@
             flex-direction: column;
             gap: 20px;
             border-left: 4px solid var(--acid-green);
+            overflow-y: auto; /* 允许侧边栏内容滚动 */
         }
 
         .avatar-container {
@@ -169,70 +158,59 @@
             position: relative;
             clip-path: polygon(10% 0, 100% 0, 100% 90%, 90% 100%, 0 100%, 0 10%);
             border: 2px solid #333;
-            transition: all 0.3s;
-        }
-
-        .avatar-container:hover {
-            border-color: var(--acid-green);
+            flex-shrink: 0;
         }
 
         .avatar-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+            width: 100%; height: 100%; object-fit: cover;
             filter: grayscale(100%) contrast(1.2);
         }
+
+        .info-group { flex: 1; }
 
         .stat-label {
             font-family: 'Teko', sans-serif;
             font-size: 1.2rem;
             color: #888;
             margin-bottom: 2px;
-            display: flex;
-            justify-content: space-between;
+            display: flex; justify-content: space-between;
         }
 
         .bar-track {
-            height: 12px;
-            background: #000;
-            transform: skew(-20deg);
-            border: 1px solid #444;
+            height: 12px; background: #000;
+            transform: skew(-20deg); border: 1px solid #444;
         }
 
         .bar-fill {
-            height: 100%;
-            background: var(--acid-green);
-            width: 50%;
+            height: 100%; background: var(--acid-green); width: 50%;
             transition: width 0.5s cubic-bezier(0.1, 0.7, 1.0, 0.1);
         }
-        /* 不同的条不同颜色 */
         #bar-sanity .bar-fill { background: var(--acid-green); }
         #bar-social .bar-fill { background: #00e5ff; }
         #bar-career .bar-fill { background: #ff0055; }
 
         /* 主内容区 */
         main {
-            background: rgba(26, 26, 26, 0.8);
-            backdrop-filter: blur(10px);
+            background: rgba(26, 26, 26, 0.9);
             display: flex;
             flex-direction: column;
             border-top: 2px solid #333;
             position: relative;
             clip-path: polygon(0 0, 98% 0, 100% 5%, 100% 100%, 0 100%);
+            min-height: 0; /* 关键：允许 Flex 子项滚动 */
         }
 
-        /* 日志区 */
+        /* 日志区 - 滚动核心 */
         #log-stream {
-            flex-grow: 1;
-            overflow-y: auto;
+            flex: 1; /* 占据剩余空间 */
+            overflow-y: auto; /* 允许内部滚动 */
             padding: 30px;
             display: flex;
             flex-direction: column;
             gap: 15px;
+            -webkit-overflow-scrolling: touch; /* iOS 丝滑滚动 */
+            scroll-behavior: smooth;
         }
-
-        #log-stream::-webkit-scrollbar { width: 6px; }
-        #log-stream::-webkit-scrollbar-thumb { background: var(--acid-green); }
 
         .log-node {
             background: linear-gradient(90deg, rgba(0,0,0,0.6), transparent);
@@ -240,7 +218,7 @@
             padding: 15px;
             font-size: 1.1rem;
             line-height: 1.5;
-            animation: slideIn 0.3s ease-out;
+            flex-shrink: 0; /* 防止内容被压缩 */
         }
 
         .log-node.active {
@@ -249,25 +227,20 @@
         }
 
         .time-tag {
-            font-family: 'Teko', sans-serif;
-            color: var(--acid-green);
-            font-size: 1.1rem;
-            margin-bottom: 5px;
+            font-family: 'Teko', sans-serif; color: var(--acid-green);
+            font-size: 1.1rem; margin-bottom: 5px;
         }
 
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(-20px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        /* 底部控制区 */
+        /* 底部控制区 - 固定在底部 */
         #control-deck {
+            flex-shrink: 0; /* 防止被压缩 */
             padding: 20px;
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 15px;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.8);
             border-top: 1px solid #333;
+            z-index: 10;
         }
 
         .cmd-btn {
@@ -278,60 +251,93 @@
             cursor: pointer;
             text-align: left;
             position: relative;
-            overflow: hidden;
             transition: all 0.2s;
             clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
         }
 
-        .cmd-btn:hover {
-            border-color: var(--acid-green);
-            background: rgba(211, 255, 0, 0.1);
-            transform: translateY(-2px);
-        }
-
         .cmd-btn:active {
-            transform: scale(0.98);
+            background: var(--acid-green);
+            color: #000;
+            border-color: var(--acid-green);
         }
 
         .cmd-title {
-            font-family: 'Teko', sans-serif;
-            font-size: 1.5rem;
-            color: var(--acid-green);
-            text-transform: uppercase;
+            font-family: 'Teko', sans-serif; font-size: 1.5rem;
+            color: var(--acid-green); text-transform: uppercase;
         }
+        .cmd-btn:active .cmd-title { color: #000; }
 
-        .cmd-desc {
-            font-size: 0.9rem;
-            color: #aaa;
-            margin-top: 5px;
-        }
+        .cmd-desc { font-size: 0.9rem; color: #aaa; margin-top: 5px; }
+        .cmd-btn:active .cmd-desc { color: #333; }
 
-        /* 手机适配 */
+        /* --- 手机端完美适配 --- */
         @media (max-width: 768px) {
-            .game-logo { font-size: 3rem; }
+            .game-logo { font-size: 3.5rem; }
+            .start-btn { font-size: 1.8rem; padding: 10px 40px; }
+
+            /* 容器改为 Flex 列布局，更稳健 */
             #game-ui {
                 width: 100%; height: 100%;
-                grid-template-columns: 1fr;
-                grid-template-rows: 60px auto 1fr auto;
+                display: flex;
+                flex-direction: column;
                 gap: 0;
             }
-            header { clip-path: none; padding: 0 15px; }
+
+            /* 头部紧凑化 */
+            header {
+                flex: 0 0 50px; /* 固定高度 */
+                clip-path: none;
+                padding: 0 10px;
+                border-bottom: 2px solid var(--acid-green);
+            }
+            .header-title { font-size: 1.4rem; }
+            .nav-btn { padding: 2px 10px; font-size: 0.8rem; }
+
+            /* 侧边栏紧凑化 */
             aside { 
+                flex: 0 0 auto; /* 高度由内容决定 */
                 flex-direction: row; 
                 padding: 10px; 
                 clip-path: none; 
                 border-left: none; 
-                border-bottom: 2px solid var(--acid-green);
-                height: auto;
+                border-bottom: 1px solid #333;
                 align-items: center;
+                gap: 10px;
+                overflow-x: auto; /* 允许横向滑动 */
             }
-            .avatar-container { width: 60px; height: 60px; margin: 0; }
-            .info-group { flex: 1; margin-left: 15px; }
-            .stat-label { font-size: 1rem; }
-            .bar-track { height: 8px; transform: skew(-10deg); }
-            main { clip-path: none; }
-            #control-deck { grid-template-columns: 1fr; gap: 10px; padding: 10px; }
-            .cmd-btn { padding: 12px; }
+            .avatar-container { width: 50px; height: 50px; border: 1px solid #333; }
+            .info-group {
+                display: flex;
+                gap: 15px;
+                overflow-x: auto; /* 数据条也可以横向滑 */
+                padding-right: 10px;
+            }
+            .info-group > div { min-width: 100px; margin-bottom: 0 !important; }
+            .stat-label { font-size: 0.9rem; }
+            .bar-track { height: 6px; transform: skew(-10deg); }
+
+            /* 主内容区域撑满剩余空间 */
+            main {
+                flex: 1; /* 占据剩余所有高度 */
+                clip-path: none;
+                min-height: 0; /* 关键：允许内部滚动 */
+            }
+
+            #log-stream { padding: 15px; }
+            .log-node { padding: 10px; font-size: 1rem; }
+
+            /* 底部按钮改为单列堆叠 */
+            #control-deck {
+                flex: 0 0 auto;
+                grid-template-columns: 1fr;
+                gap: 8px;
+                padding: 10px;
+                padding-bottom: 25px; /* 适配 iPhone 底部横条 */
+                border-top: 1px solid var(--acid-green);
+            }
+            .cmd-btn { padding: 10px; }
+            .cmd-title { font-size: 1.2rem; }
+            .cmd-desc { font-size: 0.8rem; }
         }
 
         /* 打字机光标 */
@@ -346,28 +352,23 @@
 </head>
 <body>
 
-    <!-- 主菜单 (Start Screen) -->
+    <!-- 主菜单 -->
     <div id="main-menu">
         <div class="game-logo">PROJECT<br>ECHO</div>
-        <div style="font-size: 1.2rem; color: #888; margin-bottom: 30px; letter-spacing: 2px;">ZERO DEGREE OBSERVATION</div>
-        <!-- 点击这个按钮会解锁音频 -->
+        <div style="font-size: 1rem; color: #888; margin-bottom: 30px; letter-spacing: 2px; text-align: center;">ZERO DEGREE OBSERVATION<br>MOBILE OPTIMIZED</div>
         <button class="start-btn" onclick="startGame()">START MISSION</button>
     </div>
 
     <!-- 游戏主界面 -->
     <div id="game-ui">
-        <!-- 顶栏 -->
         <header>
             <div class="header-title">ECHO://TERMINAL</div>
             <div class="nav-group">
-                <!-- BGM 控制 -->
                 <button class="nav-btn" id="bgm-toggle" onclick="toggleBGM()">♪ ON</button>
-                <!-- 返回主菜单 -->
                 <button class="nav-btn" onclick="exitToMenu()">EXIT</button>
             </div>
         </header>
 
-        <!-- 侧边栏 -->
         <aside>
             <div class="avatar-container" onclick="document.getElementById('file-input').click()">
                 <img id="avatar-img" src="https://images.unsplash.com/photo-1595152772835-219674b2a8a6?q=80&w=500&auto=format&fit=crop">
@@ -376,23 +377,22 @@
             
             <div class="info-group">
                 <div style="margin-bottom: 15px;">
-                    <div class="stat-label"><span>PSYCHE (SANITY)</span> <span id="val-sanity">80%</span></div>
+                    <div class="stat-label"><span>PSYCHE</span> <span id="val-sanity">80%</span></div>
                     <div class="bar-track"><div id="bar-sanity" class="bar-fill"></div></div>
                 </div>
 
                 <div style="margin-bottom: 15px;">
-                    <div class="stat-label"><span>SOCIAL LINK</span> <span id="val-social">60%</span></div>
+                    <div class="stat-label"><span>SOCIAL</span> <span id="val-social">60%</span></div>
                     <div class="bar-track"><div id="bar-social" class="bar-fill"></div></div>
                 </div>
 
                 <div>
-                    <div class="stat-label"><span>CAREER STATUS</span> <span id="val-career">50%</span></div>
+                    <div class="stat-label"><span>CAREER</span> <span id="val-career">50%</span></div>
                     <div class="bar-track"><div id="bar-career" class="bar-fill"></div></div>
                 </div>
             </div>
         </aside>
 
-        <!-- 主内容 -->
         <main>
             <div id="log-stream"></div>
             <div id="control-deck"></div>
@@ -401,7 +401,7 @@
 
     <script>
         // --- 音乐与音效系统 ---
-        // 建议使用较短的循环音乐
+        // 替换为你自己的音乐链接
         const BGM_URL = "https://cdn.pixabay.com/download/audio/2022/03/24/audio_076e0774a3.mp3?filename=sci-fi-cyberpunk-trailer-110587.mp3";
         let bgm = new Audio(BGM_URL);
         bgm.loop = true;
@@ -409,12 +409,8 @@
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-        // 核心：点击开始游戏时，解锁音频并播放 BGM
         function startGame() {
-            // 隐藏菜单
             document.getElementById('main-menu').classList.add('hidden');
-            
-            // 播放 BGM (如果之前暂停了，这里会重新开始)
             if(audioCtx.state === 'suspended') audioCtx.resume();
             
             bgm.play().then(() => {
@@ -423,7 +419,6 @@
 
             playSound('startup');
             
-            // 如果是第一次进入，渲染开场
             if(logStream.innerHTML === "") {
                 renderScene('start');
             }
@@ -431,8 +426,6 @@
 
         function exitToMenu() {
             document.getElementById('main-menu').classList.remove('hidden');
-            // 退出时暂停音乐，或者保持播放看你喜好
-            // bgm.pause(); 
         }
 
         function toggleBGM() {
@@ -453,14 +446,14 @@
             gain.connect(audioCtx.destination);
             const now = audioCtx.currentTime;
 
-            if (type === 'type') { // 打字
+            if (type === 'type') {
                 osc.type = 'square';
                 osc.frequency.setValueAtTime(600 + Math.random()*200, now);
                 gain.gain.setValueAtTime(0.02, now);
                 gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
                 osc.start(now);
                 osc.stop(now + 0.05);
-            } else if (type === 'click') { // 按钮
+            } else if (type === 'click') {
                 osc.type = 'sawtooth';
                 osc.frequency.setValueAtTime(100, now);
                 osc.frequency.linearRampToValueAtTime(50, now + 0.1);
@@ -468,7 +461,7 @@
                 gain.gain.linearRampToValueAtTime(0, now + 0.1);
                 osc.start(now);
                 osc.stop(now + 0.1);
-            } else if (type === 'startup') { // 启动
+            } else if (type === 'startup') {
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(220, now);
                 osc.frequency.exponentialRampToValueAtTime(880, now + 0.3);
@@ -555,12 +548,15 @@
                 if(char === ">") inTag = false;
                 if(!inTag) {
                     element.innerHTML = buffer;
+                    // 确保一直滚动到底部
                     logStream.scrollTop = logStream.scrollHeight;
                     if(Math.random() > 0.5) playSound('type');
                     await new Promise(r => setTimeout(r, 20));
                 }
             }
             element.classList.remove('typing');
+            // 最后再强制滚动一次
+            logStream.scrollTop = logStream.scrollHeight;
         }
 
         async function renderScene(sceneId) {
@@ -571,7 +567,6 @@
                 updateUI();
             }
 
-            // 移除旧激活状态
             document.querySelectorAll('.log-node').forEach(n => n.classList.remove('active'));
 
             const node = document.createElement('div');
@@ -579,12 +574,10 @@
             node.innerHTML = `<div class="time-tag">// ${scene.time}</div><div class="content"></div>`;
             logStream.appendChild(node);
 
-            // 隐藏按钮
             controlDeck.innerHTML = '';
             
             await typeWriter(node.querySelector('.content'), scene.text);
 
-            // 生成按钮
             scene.choices.forEach(choice => {
                 const btn = document.createElement('button');
                 btn.className = 'cmd-btn';
@@ -601,6 +594,8 @@
                 };
                 controlDeck.appendChild(btn);
             });
+            // 生成按钮后也确保可见
+            logStream.scrollTop = logStream.scrollHeight;
         }
 
         function loadAvatar(input) {
