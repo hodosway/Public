@@ -3,41 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>回响计划：样本观察</title>
+    <title>PROJECT ECHO: OVERDRIVE</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 像素字体 -->
-    <link href="https://fonts.googleapis.com/css2?family=Zpix&family=VT323&display=swap" rel="stylesheet">
-    <!-- 引入 Zpix 中文像素字体，如果加载失败会回退到系统字体，但保持像素化渲染 -->
+    <!-- 引入力量感字体 Teko 和 Oswald -->
+    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@400;600;700&family=Oswald:wght@400;700&display=swap" rel="stylesheet">
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap');
-
         :root {
-            /* 零度配色方案：冷、净、硬 */
-            --bg-deep: #0a0b10;     /* 深空黑 */
-            --bg-panel: #14161f;    /* 面板灰 */
-            --bg-slot: #1c202b;     /* 插槽深灰 */
+            /* 2XKO 风格配色 */
+            --acid-green: #D3FF00;  /* 核心酸性绿 */
+            --void-black: #080808;  /* 虚空黑 */
+            --panel-grey: #1a1a1a;  /* 面板灰 */
+            --pure-white: #ffffff;
+            --alert-red: #FF2E00;
             
-            --text-main: #e2e8f0;   /* 冰白 */
-            --text-dim: #64748b;    /* 暗灰 */
-            
-            --accent-cyan: #00f0ff; /* 终端青 (高亮) */
-            --accent-red: #ff2a6d;  /* 警告红 */
-            --accent-yellow: #ffcc00; /* 注意黄 */
-            
-            --border-color: #334155;
+            --slant: polygon(0 0, 100% 0, 95% 100%, 0% 100%); /* 基础切角 */
+            --slant-btn: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); /* 按钮切角 */
         }
 
         * {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
-            /* 保持像素风的锐利 */
-            image-rendering: pixelated; 
+            user-select: none;
         }
 
         body {
-            background-color: var(--bg-deep);
-            color: var(--text-main);
-            font-family: 'Noto Sans SC', 'VT323', sans-serif; /* 优先中文无衬线，兼容像素感 */
+            background-color: var(--void-black);
+            color: var(--pure-white);
+            font-family: 'Oswald', sans-serif;
             height: 100vh;
             width: 100vw;
             margin: 0;
@@ -45,429 +38,500 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            
-            /* 极简网格背景 */
+            /* 动态背景纹理 */
             background-image: 
-                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-            background-size: 40px 40px;
+                linear-gradient(45deg, #111 25%, transparent 25%, transparent 75%, #111 75%, #111),
+                linear-gradient(45deg, #111 25%, transparent 25%, transparent 75%, #111 75%, #111);
+            background-size: 60px 60px;
+            background-position: 0 0, 30px 30px;
         }
 
-        /* 容器：就像一个悬浮的平板 */
-        #terminal-container {
+        /* --- 主菜单 (Start Screen) --- */
+        #main-menu {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(8, 8, 8, 0.95);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.4s cubic-bezier(0.7, 0, 0.3, 1);
+        }
+
+        #main-menu.hidden {
+            transform: translateY(-100%);
+        }
+
+        .game-logo {
+            font-family: 'Teko', sans-serif;
+            font-size: 5rem;
+            line-height: 0.8;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--pure-white);
+            margin-bottom: 20px;
+            text-shadow: 4px 4px 0px var(--acid-green);
+            transform: skew(-10deg);
+        }
+
+        .start-btn {
+            background: var(--acid-green);
+            color: var(--void-black);
+            font-family: 'Teko', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            padding: 10px 60px;
+            border: none;
+            cursor: pointer;
+            clip-path: var(--slant-btn);
+            transition: all 0.2s;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .start-btn:hover {
+            transform: scale(1.05) skew(-5deg);
+            background: var(--pure-white);
+            box-shadow: 0 0 20px var(--acid-green);
+        }
+
+        /* --- 游戏主界面容器 --- */
+        #game-ui {
             width: 95%;
             height: 90%;
-            max-width: 1000px;
-            background-color: var(--bg-panel);
-            border: 1px solid var(--border-color);
+            max-width: 1200px;
             display: grid;
-            grid-template-columns: 260px 1fr;
-            grid-template-rows: 50px 1fr;
-            box-shadow: 0 0 40px rgba(0,0,0,0.5);
+            grid-template-columns: 300px 1fr;
+            grid-template-rows: 80px 1fr;
+            gap: 15px;
+            position: relative;
         }
 
-        /* 顶部状态栏 */
+        /* 顶部栏 */
         header {
             grid-column: 1 / 3;
-            border-bottom: 1px solid var(--border-color);
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            padding: 0 20px;
-            background: rgba(0,0,0,0.2);
+            align-items: center;
+            background: var(--panel-grey);
+            padding: 0 30px;
+            clip-path: polygon(0 0, 100% 0, 100% 80%, 98% 100%, 0 100%);
+            border-bottom: 4px solid var(--acid-green);
         }
 
         .header-title {
-            font-size: 1rem;
-            letter-spacing: 2px;
-            font-weight: bold;
-            color: var(--accent-cyan);
+            font-family: 'Teko', sans-serif;
+            font-size: 2rem;
+            color: var(--acid-green);
             text-transform: uppercase;
         }
 
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background-color: var(--accent-red);
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 8px;
-            animation: pulse 2s infinite;
+        .nav-group {
+            display: flex;
+            gap: 15px;
         }
 
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.3; }
-            100% { opacity: 1; }
+        .nav-btn {
+            background: transparent;
+            border: 2px solid #444;
+            color: #fff;
+            padding: 5px 20px;
+            font-family: 'Oswald', sans-serif;
+            text-transform: uppercase;
+            font-weight: bold;
+            cursor: pointer;
+            transform: skew(-10deg);
+            transition: all 0.2s;
         }
 
-        /* 左侧面板：档案 */
+        .nav-btn:hover {
+            border-color: var(--acid-green);
+            color: var(--acid-green);
+        }
+
+        /* 左侧面板 */
         aside {
-            border-right: 1px solid var(--border-color);
+            background: var(--panel-grey);
             padding: 20px;
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 10% 100%, 0 95%);
             display: flex;
             flex-direction: column;
             gap: 20px;
-            background: rgba(0,0,0,0.1);
+            border-left: 4px solid var(--acid-green);
         }
 
-        .avatar-box {
+        .avatar-container {
             width: 100%;
             aspect-ratio: 1/1;
-            background: var(--bg-slot);
-            border: 1px solid var(--border-color);
+            background: #000;
             position: relative;
-            overflow: hidden;
-            cursor: pointer;
-            transition: border-color 0.3s;
-        }
-        
-        .avatar-box:hover {
-            border-color: var(--accent-cyan);
+            clip-path: polygon(10% 0, 100% 0, 100% 90%, 90% 100%, 0 100%, 0 10%);
+            border: 2px solid #333;
+            transition: all 0.3s;
         }
 
-        .avatar-box img {
+        .avatar-container:hover {
+            border-color: var(--acid-green);
+        }
+
+        .avatar-container img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            filter: grayscale(100%) contrast(1.1); /* 冷漠的黑白照 */
-            opacity: 0.8;
-        }
-        
-        .avatar-overlay {
-            position: absolute;
-            bottom: 0; left: 0; width: 100%;
-            background: rgba(0,0,0,0.7);
-            color: white;
-            font-size: 0.7rem;
-            text-align: center;
-            padding: 4px;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-        
-        .avatar-box:hover .avatar-overlay { opacity: 1; }
-
-        .info-label {
-            font-size: 0.8rem;
-            color: var(--text-dim);
-            margin-bottom: 4px;
+            filter: grayscale(100%) contrast(1.2);
         }
 
-        .info-value {
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: var(--text-main);
-            margin-bottom: 12px;
+        .stat-label {
+            font-family: 'Teko', sans-serif;
+            font-size: 1.2rem;
+            color: #888;
+            margin-bottom: 2px;
+            display: flex;
+            justify-content: space-between;
         }
 
-        /* 数据条 (Clean style) */
-        .stat-bar-bg {
-            height: 6px;
-            background: var(--bg-slot);
-            width: 100%;
-            margin-bottom: 20px;
-            overflow: hidden;
+        .bar-track {
+            height: 12px;
+            background: #000;
+            transform: skew(-20deg);
+            border: 1px solid #444;
         }
-        
-        .stat-bar-fill {
+
+        .bar-fill {
             height: 100%;
-            background: var(--accent-cyan);
+            background: var(--acid-green);
             width: 50%;
-            transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+            transition: width 0.5s cubic-bezier(0.1, 0.7, 1.0, 0.1);
         }
+        /* 不同的条不同颜色 */
+        #bar-sanity .bar-fill { background: var(--acid-green); }
+        #bar-social .bar-fill { background: #00e5ff; }
+        #bar-career .bar-fill { background: #ff0055; }
 
         /* 主内容区 */
         main {
-            padding: 0;
+            background: rgba(26, 26, 26, 0.8);
+            backdrop-filter: blur(10px);
             display: flex;
             flex-direction: column;
-            overflow: hidden;
-            background: var(--bg-panel);
+            border-top: 2px solid #333;
             position: relative;
+            clip-path: polygon(0 0, 98% 0, 100% 5%, 100% 100%, 0 100%);
         }
 
-        /* 日志流 */
+        /* 日志区 */
         #log-stream {
             flex-grow: 1;
             overflow-y: auto;
             padding: 30px;
-            font-family: 'Noto Sans SC', sans-serif;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 15px;
         }
-        
-        /* 隐藏滚动条但保留功能 */
-        #log-stream::-webkit-scrollbar { width: 4px; }
-        #log-stream::-webkit-scrollbar-thumb { background: var(--border-color); }
+
+        #log-stream::-webkit-scrollbar { width: 6px; }
+        #log-stream::-webkit-scrollbar-thumb { background: var(--acid-green); }
 
         .log-node {
-            border-left: 2px solid var(--border-color);
-            padding-left: 20px;
-            opacity: 0;
-            animation: fadeIn 0.5s forwards;
-            position: relative;
-        }
-        
-        .log-node::before {
-            content: '';
-            position: absolute;
-            left: -5px; top: 0;
-            width: 8px; height: 8px;
-            background: var(--bg-panel);
-            border: 2px solid var(--text-dim);
-            border-radius: 50%;
+            background: linear-gradient(90deg, rgba(0,0,0,0.6), transparent);
+            border-left: 4px solid #444;
+            padding: 15px;
+            font-size: 1.1rem;
+            line-height: 1.5;
+            animation: slideIn 0.3s ease-out;
         }
 
         .log-node.active {
-            border-left-color: var(--accent-cyan);
-        }
-        .log-node.active::before {
-            border-color: var(--accent-cyan);
-            background: var(--accent-cyan);
+            border-left-color: var(--acid-green);
+            background: linear-gradient(90deg, rgba(211, 255, 0, 0.05), transparent);
         }
 
-        @keyframes fadeIn { to { opacity: 1; } }
-
-        .time-stamp {
-            font-family: 'VT323', monospace;
-            color: var(--accent-cyan);
-            font-size: 0.9rem;
+        .time-tag {
+            font-family: 'Teko', sans-serif;
+            color: var(--acid-green);
+            font-size: 1.1rem;
             margin-bottom: 5px;
-            opacity: 0.8;
         }
 
-        .log-content {
-            font-size: 1rem;
-            line-height: 1.6;
-            color: #d1d5db;
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
         }
 
-        /* 底部控制台 */
+        /* 底部控制区 */
         #control-deck {
-            border-top: 1px solid var(--border-color);
-            background: rgba(0,0,0,0.2);
-            padding: 20px 30px;
+            padding: 20px;
             display: grid;
-            grid-template-columns: repeat(3, 1fr); /* 严格的三列布局 */
-            gap: 20px;
-            min-height: 140px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            background: rgba(0,0,0,0.5);
+            border-top: 1px solid #333;
         }
 
         .cmd-btn {
             background: transparent;
-            border: 1px solid var(--border-color);
-            color: var(--text-dim);
+            border: 2px solid #444;
+            color: #fff;
             padding: 15px;
             cursor: pointer;
             text-align: left;
-            transition: all 0.2s;
             position: relative;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            overflow: hidden;
+            transition: all 0.2s;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
         }
 
         .cmd-btn:hover {
-            border-color: var(--accent-cyan);
-            color: var(--accent-cyan);
-            background: rgba(0, 240, 255, 0.05);
+            border-color: var(--acid-green);
+            background: rgba(211, 255, 0, 0.1);
+            transform: translateY(-2px);
         }
 
-        .cmd-btn::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 0%; height: 2px;
-            background: var(--accent-cyan);
-            transition: width 0.2s;
+        .cmd-btn:active {
+            transform: scale(0.98);
         }
-        .cmd-btn:hover::after { width: 100%; }
 
         .cmd-title {
-            font-size: 1rem;
-            font-weight: bold;
-            margin-bottom: 5px;
+            font-family: 'Teko', sans-serif;
+            font-size: 1.5rem;
+            color: var(--acid-green);
+            text-transform: uppercase;
         }
-        
+
         .cmd-desc {
-            font-size: 0.8rem;
-            opacity: 0.7;
-            font-family: 'Noto Sans SC', sans-serif;
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-top: 5px;
         }
 
         /* 手机适配 */
         @media (max-width: 768px) {
-            #terminal-container {
-                width: 100%;
-                height: 100%;
-                border: none;
+            .game-logo { font-size: 3rem; }
+            #game-ui {
+                width: 100%; height: 100%;
                 grid-template-columns: 1fr;
-                grid-template-rows: 50px auto 1fr auto;
+                grid-template-rows: 60px auto 1fr auto;
+                gap: 0;
             }
-
-            aside {
-                flex-direction: row;
-                padding: 15px;
-                gap: 15px;
-                border-right: none;
-                border-bottom: 1px solid var(--border-color);
+            header { clip-path: none; padding: 0 15px; }
+            aside { 
+                flex-direction: row; 
+                padding: 10px; 
+                clip-path: none; 
+                border-left: none; 
+                border-bottom: 2px solid var(--acid-green);
+                height: auto;
                 align-items: center;
             }
-
-            .avatar-box {
-                width: 60px;
-                height: 60px;
-                margin-bottom: 0;
-            }
-
-            .info-group {
-                display: flex;
-                gap: 15px;
-                flex: 1;
-                justify-content: space-around;
-            }
-            
-            .stat-wrapper {
-                flex: 1;
-            }
-            
-            .stat-bar-bg { margin-bottom: 0; }
-            .info-label { margin-bottom: 2px; }
-            .info-value { display: none; } /* 手机端隐藏具体数值，只看条 */
-
-            #control-deck {
-                grid-template-columns: 1fr;
-                padding: 15px;
-                gap: 10px;
-            }
-            
-            .cmd-btn {
-                padding: 12px;
-                min-height: auto;
-            }
+            .avatar-container { width: 60px; height: 60px; margin: 0; }
+            .info-group { flex: 1; margin-left: 15px; }
+            .stat-label { font-size: 1rem; }
+            .bar-track { height: 8px; transform: skew(-10deg); }
+            main { clip-path: none; }
+            #control-deck { grid-template-columns: 1fr; gap: 10px; padding: 10px; }
+            .cmd-btn { padding: 12px; }
         }
+
+        /* 打字机光标 */
+        .typing::after {
+            content: '_';
+            animation: blink 0.5s infinite;
+            color: var(--acid-green);
+        }
+        @keyframes blink { 50% { opacity: 0; } }
+
     </style>
 </head>
 <body>
 
-    <div id="terminal-container">
+    <!-- 主菜单 (Start Screen) -->
+    <div id="main-menu">
+        <div class="game-logo">PROJECT<br>ECHO</div>
+        <div style="font-size: 1.2rem; color: #888; margin-bottom: 30px; letter-spacing: 2px;">ZERO DEGREE OBSERVATION</div>
+        <!-- 点击这个按钮会解锁音频 -->
+        <button class="start-btn" onclick="startGame()">START MISSION</button>
+    </div>
+
+    <!-- 游戏主界面 -->
+    <div id="game-ui">
         <!-- 顶栏 -->
         <header>
-            <div class="header-title">Project Echo :: 样本观察记录</div>
-            <div style="font-size: 0.8rem; color: var(--text-dim);">
-                <span class="status-dot"></span> 实时数据流
+            <div class="header-title">ECHO://TERMINAL</div>
+            <div class="nav-group">
+                <!-- BGM 控制 -->
+                <button class="nav-btn" id="bgm-toggle" onclick="toggleBGM()">♪ ON</button>
+                <!-- 返回主菜单 -->
+                <button class="nav-btn" onclick="exitToMenu()">EXIT</button>
             </div>
         </header>
 
-        <!-- 侧边栏：样本信息 -->
+        <!-- 侧边栏 -->
         <aside>
-            <div class="avatar-box" onclick="document.getElementById('file-input').click()">
-                <img id="avatar-img" src="https://images.unsplash.com/photo-1595152772835-219674b2a8a6?q=80&w=500&auto=format&fit=crop" alt="样本头像">
-                <div class="avatar-overlay">更换样本</div>
+            <div class="avatar-container" onclick="document.getElementById('file-input').click()">
+                <img id="avatar-img" src="https://images.unsplash.com/photo-1595152772835-219674b2a8a6?q=80&w=500&auto=format&fit=crop">
                 <input type="file" id="file-input" style="display: none;" accept="image/*" onchange="loadAvatar(this)">
             </div>
             
             <div class="info-group">
-                <div class="stat-wrapper">
-                    <div class="info-label">样本编号</div>
-                    <div class="info-value">LIAO-Z-01</div>
-                    
-                    <div class="info-label">心理阈值</div>
-                    <div class="stat-bar-bg">
-                        <div id="bar-sanity" class="stat-bar-fill" style="width: 80%;"></div>
-                    </div>
+                <div style="margin-bottom: 15px;">
+                    <div class="stat-label"><span>PSYCHE (SANITY)</span> <span id="val-sanity">80%</span></div>
+                    <div class="bar-track"><div id="bar-sanity" class="bar-fill"></div></div>
                 </div>
 
-                <div class="stat-wrapper">
-                    <div class="info-label">社会链接</div>
-                    <div class="stat-bar-bg">
-                        <div id="bar-social" class="stat-bar-fill" style="width: 60%; background-color: var(--accent-yellow);"></div>
-                    </div>
+                <div style="margin-bottom: 15px;">
+                    <div class="stat-label"><span>SOCIAL LINK</span> <span id="val-social">60%</span></div>
+                    <div class="bar-track"><div id="bar-social" class="bar-fill"></div></div>
                 </div>
 
-                <div class="stat-wrapper">
-                    <div class="info-label">资源/职级</div>
-                    <div class="stat-bar-bg">
-                        <div id="bar-career" class="stat-bar-fill" style="width: 50%; background-color: #fff;"></div>
-                    </div>
+                <div>
+                    <div class="stat-label"><span>CAREER STATUS</span> <span id="val-career">50%</span></div>
+                    <div class="bar-track"><div id="bar-career" class="bar-fill"></div></div>
                 </div>
             </div>
         </aside>
 
         <!-- 主内容 -->
         <main>
-            <div id="log-stream">
-                <!-- 动态日志生成区 -->
-            </div>
-
-            <div id="control-deck">
-                <!-- 动态按钮区 -->
-            </div>
+            <div id="log-stream"></div>
+            <div id="control-deck"></div>
         </main>
     </div>
 
     <script>
-        // --- 核心数据 ---
-        let stats = { 
-            sanity: 80,   // 心理
-            social: 60,   // 社会
-            career: 50    // 职业
-        };
+        // --- 音乐与音效系统 ---
+        // 建议使用较短的循环音乐
+        const BGM_URL = "https://cdn.pixabay.com/download/audio/2022/03/24/audio_076e0774a3.mp3?filename=sci-fi-cyberpunk-trailer-110587.mp3";
+        let bgm = new Audio(BGM_URL);
+        bgm.loop = true;
+        bgm.volume = 0.5;
 
-        // --- 零度写作剧本 (Zero Degree Script) ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        // 核心：点击开始游戏时，解锁音频并播放 BGM
+        function startGame() {
+            // 隐藏菜单
+            document.getElementById('main-menu').classList.add('hidden');
+            
+            // 播放 BGM (如果之前暂停了，这里会重新开始)
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            
+            bgm.play().then(() => {
+                document.getElementById('bgm-toggle').textContent = "♪ ON";
+            }).catch(e => console.log("Audio play blocked", e));
+
+            playSound('startup');
+            
+            // 如果是第一次进入，渲染开场
+            if(logStream.innerHTML === "") {
+                renderScene('start');
+            }
+        }
+
+        function exitToMenu() {
+            document.getElementById('main-menu').classList.remove('hidden');
+            // 退出时暂停音乐，或者保持播放看你喜好
+            // bgm.pause(); 
+        }
+
+        function toggleBGM() {
+            const btn = document.getElementById('bgm-toggle');
+            if (bgm.paused) {
+                bgm.play();
+                btn.textContent = "♪ ON";
+            } else {
+                bgm.pause();
+                btn.textContent = "♪ OFF";
+            }
+        }
+
+        function playSound(type) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+
+            if (type === 'type') { // 打字
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(600 + Math.random()*200, now);
+                gain.gain.setValueAtTime(0.02, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+                osc.start(now);
+                osc.stop(now + 0.05);
+            } else if (type === 'click') { // 按钮
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(100, now);
+                osc.frequency.linearRampToValueAtTime(50, now + 0.1);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
+            } else if (type === 'startup') { // 启动
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(220, now);
+                osc.frequency.exponentialRampToValueAtTime(880, now + 0.3);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.5);
+                osc.start(now);
+                osc.stop(now + 0.5);
+            }
+        }
+
+        // --- 游戏逻辑 ---
+        let stats = { sanity: 80, social: 60, career: 50 };
         const storyNodes = {
             start: {
                 time: "08:31:04",
-                text: "样本进入地铁 3 号线车厢。由于昨夜 4 小时 12 分钟的睡眠不足，样本在座位上进入浅层睡眠状态。一名老年乘客在其面前停留 45 秒。随后，周围乘客启动摄像设备。30 分钟后，相关视频上传至流媒体平台，标签包含“素质”、“教育缺失”。<br><br>系统建议操作：",
+                text: "样本进入地铁 3 号线。睡眠不足引发浅层休克。老年乘客停留 45s 未获让座。周边设备记录中。视频上传至流媒体，标签：#巨婴 #素质。<br><br>系统介入建议：",
                 choices: [
-                    { title: "权重降级", desc: "降低视频流推广权重。限制关键词索引。", impact: { sanity: 0, social: 0, career: 0 }, next: "act_suppress" },
-                    { title: "标签重定向", desc: "关联标签：#冷漠。增加推送频次。", impact: { sanity: -15, social: -20, career: 0 }, next: "act_inflame" },
-                    { title: "数据披露", desc: "公开样本考勤记录。关联标签：#过劳。", impact: { sanity: -5, social: 10, career: -15 }, next: "act_reframe" }
+                    { title: "SUPPRESS", desc: "降权/限流/封锁关键词", impact: { sanity: 0, social: 0, career: 0 }, next: "act_suppress" },
+                    { title: "INFLAME", desc: "标签重定向：#冷漠 / 增加推送", impact: { sanity: -15, social: -20, career: 0 }, next: "act_inflame" },
+                    { title: "REFRAME", desc: "披露考勤数据 / 标签：#过劳", impact: { sanity: -5, social: 10, career: -15 }, next: "act_reframe" }
                 ]
             },
             act_suppress: {
                 time: "12:15:00",
-                text: "干预生效。视频播放量停留在 203 次。样本准时打卡。未察觉异常。14:00，部门主管在工作群发布全员通告，指出团队整体业绩未达标。",
-                choices: [{ title: "继续监测", desc: "保持当前观测频率。", impact: {}, next: "incident_work" }]
+                text: "干预生效。播放量锁定 203。样本未察觉异常。14:00 部门主管发布业绩预警通告。",
+                choices: [{ title: "MONITOR", desc: "继续当前观测频率", impact: {}, next: "incident_work" }]
             },
             act_inflame: {
                 time: "12:15:00",
-                text: "视频播放量突破 50 万。样本私人通讯终端收到 322 条陌生信息。样本心率均值上升至 95bpm。办公区域内，三名同事视线在样本身上停留超过 5 秒。",
-                choices: [{ title: "记录数据", desc: "归档当前压力数值。", impact: {}, next: "incident_work" }]
+                text: "播放量突破 50 万。样本收到 322 条攻击性信息。心率均值 95bpm。办公区视线压力指数上升。",
+                choices: [{ title: "LOG DATA", desc: "归档压力数值", impact: {}, next: "incident_work" }]
             },
             act_reframe: {
                 time: "12:15:00",
-                text: "舆论焦点转移。样本获得 1.2 万次点赞。HR 部门启动风险评估程序，判定样本存在“潜在负面影响”。",
-                choices: [{ title: "记录数据", desc: "更新职级风险指数。", impact: {}, next: "incident_work" }]
+                text: "舆论转移。样本获 1.2 万点赞。HR 启动风险评估，判定存在“潜在负面影响”。",
+                choices: [{ title: "UPDATE", desc: "更新职级风险指数", impact: {}, next: "incident_work" }]
             },
             incident_work: {
                 time: "11-15 19:42",
-                text: "样本在 4 人私密群组发送文本：“管理层决策逻辑存在严重漏洞。”<br>监测到群成员 A 进行截屏操作，目标发送对象为公司高层。<br>窗口期剩余 10 秒。",
+                text: "样本在私密群组发送文本：“管理层逻辑漏洞严重。”<br>监测到群成员 A 截屏，目标发送对象：高层。<br>窗口期剩余 10 秒。",
                 choices: [
-                    { title: "数据阻断", desc: "模拟网络丢包，销毁传输数据。", impact: { sanity: 5, social: 0, career: 0 }, next: "res_saved" },
-                    { title: "全域广播", desc: "将截图重定向至全员邮件列表。", impact: { sanity: -30, social: -10, career: -100 }, next: "res_fired" },
-                    { title: "无操作", desc: "允许数据自然流动。", impact: { sanity: -10, social: -5, career: -30 }, next: "res_leaked" }
+                    { title: "BLOCK", desc: "模拟丢包 / 销毁数据", impact: { sanity: 5, social: 0, career: 0 }, next: "res_saved" },
+                    { title: "BROADCAST", desc: "重定向至全员邮件", impact: { sanity: -30, social: -10, career: -100 }, next: "res_fired" },
+                    { title: "IGNORE", desc: "允许数据自然流动", impact: { sanity: -10, social: -5, career: -30 }, next: "res_leaked" }
                 ]
             },
-            res_saved: { time: "20:00:00", text: "数据传输失败。截屏文件未发出。样本在便利店购买加热食品，随后返回住所。", choices: [{ title: "下个周期", desc: "加载后续事件。", impact: {}, next: "incident_street" }] },
-            res_leaked: { time: "DAY +01", text: "样本接受人事谈话。年度绩效奖金归零。工位调整至监控盲区。", choices: [{ title: "下个周期", desc: "加载后续事件。", impact: {}, next: "incident_street" }] },
-            res_fired: { time: "DAY +01", text: "样本劳动合同即时解除。样本携带私人物品离开建筑。无人员进行道别。", choices: [{ title: "下个周期", desc: "加载后续事件。", impact: {}, next: "incident_street" }] },
+            res_saved: { time: "20:00:00", text: "阻断成功。截屏未发出。样本摄入加热食品后返所。", choices: [{ title: "NEXT CYCLE", desc: "加载后续事件", impact: {}, next: "incident_street" }] },
+            res_leaked: { time: "DAY +01", text: "接受人事谈话。绩效奖金归零。工位调整至盲区。", choices: [{ title: "NEXT CYCLE", desc: "加载后续事件", impact: {}, next: "incident_street" }] },
+            res_fired: { time: "DAY +01", text: "劳动合同解除。样本离开建筑。无人员道别。", choices: [{ title: "NEXT CYCLE", desc: "加载后续事件", impact: {}, next: "incident_street" }] },
             incident_street: {
                 time: "11-20 23:11",
-                text: "样本在非监控区域遭遇动物虐待事件。样本与两名醉酒个体发生肢体冲突。对方倒地，体表出现软组织挫伤。<br>定性分析：",
+                text: "遭遇动物虐待事件。样本与醉酒个体冲突。对方倒地，软组织挫伤。<br>定性分析：",
                 choices: [
-                    { title: "证据合成", desc: "生成热成像轨迹，判定正当防卫。", impact: { sanity: 10, social: 20, career: 0 }, next: "end_hero" },
-                    { title: "片面剪辑", desc: "仅保留推搡画面。定性：互殴。", impact: { sanity: -50, social: -50, career: -50 }, next: "end_ruin" },
-                    { title: "忽略", desc: "不进行数据干预。", impact: { sanity: -5, social: -5, career: -5 }, next: "end_mediocre" }
+                    { title: "SYNTHESIZE", desc: "生成热成像证据 / 判定正当防卫", impact: { sanity: 10, social: 20, career: 0 }, next: "end_hero" },
+                    { title: "EDIT", desc: "保留推搡画面 / 定性互殴", impact: { sanity: -50, social: -50, career: -50 }, next: "end_ruin" },
+                    { title: "IGNORE", desc: "不进行干预", impact: { sanity: -5, social: -5, career: -5 }, next: "end_mediocre" }
                 ]
             },
-            end_hero: { time: "ARCHIVE", text: "样本获得短暂社会关注。精神状态稳定。生存状态：存续。<br>观察结束。", choices: [{ title: "重置", desc: "清除缓存数据。", impact: {}, next: "start" }] },
-            end_ruin: { time: "ARCHIVE", text: "样本社会链接断裂。经济来源切断。样本在城市数据流中消失。<br>观察结束。", choices: [{ title: "重置", desc: "清除缓存数据。", impact: {}, next: "start" }] },
-            end_mediocre: { time: "ARCHIVE", text: "样本支付行政罚款。生活轨迹回归基准线。<br>观察结束。", choices: [{ title: "重置", desc: "清除缓存数据。", impact: {}, next: "start" }] }
+            end_hero: { time: "ARCHIVE", text: "获得短暂关注。精神稳定。状态：存续。<br>观察结束。", choices: [{ title: "RESET", desc: "清除缓存数据", impact: {}, next: "start" }] },
+            end_ruin: { time: "ARCHIVE", text: "社会链接断裂。经济切断。样本在数据流中消失。<br>观察结束。", choices: [{ title: "RESET", desc: "清除缓存数据", impact: {}, next: "start" }] },
+            end_mediocre: { time: "ARCHIVE", text: "支付行政罚款。轨迹回归基准线。<br>观察结束。", choices: [{ title: "RESET", desc: "清除缓存数据", impact: {}, next: "start" }] }
         };
 
-        // --- 逻辑引擎 ---
         const logStream = document.getElementById('log-stream');
         const controlDeck = document.getElementById('control-deck');
 
@@ -476,61 +540,57 @@
             document.getElementById('bar-social').style.width = Math.max(0, Math.min(100, stats.social)) + '%';
             document.getElementById('bar-career').style.width = Math.max(0, Math.min(100, stats.career)) + '%';
             
-            // 动态颜色变化
-            const bars = [
-                {id: 'bar-sanity', val: stats.sanity},
-                {id: 'bar-social', val: stats.social},
-                {id: 'bar-career', val: stats.career}
-            ];
-            
-            bars.forEach(item => {
-                const el = document.getElementById(item.id);
-                if (item.val < 30) el.style.backgroundColor = 'var(--accent-red)';
-                else if (item.id === 'bar-social') el.style.backgroundColor = 'var(--accent-yellow)';
-                else if (item.id === 'bar-career') el.style.backgroundColor = '#fff';
-                else el.style.backgroundColor = 'var(--accent-cyan)';
-            });
+            document.getElementById('val-sanity').innerText = stats.sanity + "%";
+            document.getElementById('val-social').innerText = stats.social + "%";
+            document.getElementById('val-career').innerText = stats.career + "%";
         }
 
-        function createLogNode(scene) {
-            // 移除上一个节点的 active 状态
-            const prevNodes = document.querySelectorAll('.log-node');
-            prevNodes.forEach(n => n.classList.remove('active'));
-
-            const node = document.createElement('div');
-            node.className = 'log-node active';
-            node.innerHTML = `
-                <div class="time-stamp">[TIME: ${scene.time}]</div>
-                <div class="log-content">${scene.text}</div>
-            `;
-            logStream.appendChild(node);
-            
-            // 自动滚动到底部
-            setTimeout(() => {
-                logStream.scrollTop = logStream.scrollHeight;
-            }, 100);
+        async function typeWriter(element, text) {
+            element.classList.add('typing');
+            let buffer = "";
+            let inTag = false;
+            for(const char of text) {
+                if(char === "<") inTag = true;
+                buffer += char;
+                if(char === ">") inTag = false;
+                if(!inTag) {
+                    element.innerHTML = buffer;
+                    logStream.scrollTop = logStream.scrollHeight;
+                    if(Math.random() > 0.5) playSound('type');
+                    await new Promise(r => setTimeout(r, 20));
+                }
+            }
+            element.classList.remove('typing');
         }
 
-        function renderScene(sceneId) {
+        async function renderScene(sceneId) {
             const scene = storyNodes[sceneId];
-            
             if (sceneId === 'start') {
                 logStream.innerHTML = '';
                 stats = { sanity: 80, social: 60, career: 50 };
                 updateUI();
             }
 
-            createLogNode(scene);
+            // 移除旧激活状态
+            document.querySelectorAll('.log-node').forEach(n => n.classList.remove('active'));
 
+            const node = document.createElement('div');
+            node.className = 'log-node active';
+            node.innerHTML = `<div class="time-tag">// ${scene.time}</div><div class="content"></div>`;
+            logStream.appendChild(node);
+
+            // 隐藏按钮
             controlDeck.innerHTML = '';
+            
+            await typeWriter(node.querySelector('.content'), scene.text);
+
+            // 生成按钮
             scene.choices.forEach(choice => {
                 const btn = document.createElement('button');
                 btn.className = 'cmd-btn';
-                btn.innerHTML = `
-                    <div class="cmd-title">${choice.title}</div>
-                    <div class="cmd-desc">${choice.desc}</div>
-                `;
+                btn.innerHTML = `<div class="cmd-title">${choice.title}</div><div class="cmd-desc">${choice.desc}</div>`;
                 btn.onclick = () => {
+                    playSound('click');
                     if (choice.impact) {
                         stats.sanity += choice.impact.sanity || 0;
                         stats.social += choice.impact.social || 0;
@@ -543,7 +603,6 @@
             });
         }
 
-        // 头像更换逻辑
         function loadAvatar(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -551,10 +610,6 @@
                 reader.readAsDataURL(input.files[0]);
             }
         }
-
-        // 启动
-        renderScene('start');
-
     </script>
 </body>
 </html>
