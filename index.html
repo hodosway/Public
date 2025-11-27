@@ -45,7 +45,54 @@
             inset: 0;
         }
 
-        /* --- 故障特效 (Glitch Effect) --- */
+        /* --- 动态文本特效 CSS --- */
+        .shake {
+            display: inline-block;
+            animation: shake 0.5s infinite;
+            color: var(--alert-red);
+            font-weight: bold;
+        }
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        .highlight {
+            color: var(--acid-green);
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        .glitch-text {
+            position: relative;
+            display: inline-block;
+            color: var(--pure-white);
+        }
+        .glitch-text::before, .glitch-text::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0.8;
+        }
+        .glitch-text::before {
+            color: #ff00c1;
+            animation: glitch-anim-1 2s infinite linear alternate-reverse;
+        }
+        .glitch-text::after {
+            color: #00fff9;
+            animation: glitch-anim-1 3s infinite linear alternate-reverse;
+        }
+
+        /* --- 故障特效 (屏幕级) --- */
         @keyframes glitch-anim-1 {
             0% { clip-path: inset(20% 0 80% 0); transform: translate(-2px, 1px); }
             20% { clip-path: inset(60% 0 10% 0); transform: translate(2px, -1px); }
@@ -449,6 +496,7 @@
             </div>
             
             <div class="info-group">
+                <div style="font-family:'Teko'; color:#666; margin-bottom:5px;">TARGET: <span style="color:var(--acid-green)">SISKO-4402</span></div>
                 <div style="margin-bottom: 15px;">
                     <div class="stat-label"><span>PSYCHE (SAN)</span> <span id="val-sanity">80%</span></div>
                     <div class="bar-track"><div id="bar-sanity" class="bar-fill"></div></div>
@@ -494,7 +542,7 @@
             playSound('startup');
 
             // 播放开场文字动画
-            const introText = "欢迎，操作员。<br><br>你的权限已解锁。你的目标是编号 4402 的市民：廖忠一。他只是这座城市里数百万数据节点中的一个：平庸、疲惫、且脆弱。<br><br>但在这里，你不是观察者，你是神。通过操控网络舆论的流向，你可以轻易地捧红他，或者... 毁灭他。<br><br>记住，对系统而言，他是数据。但对他而言，这是他仅有的一次人生。";
+            const introText = "欢迎，操作员。<br><br>你的权限已解锁。你的观察目标是市民 <span class='highlight'>西斯克 (SISKO)</span>，ID 4402。<br><br>他只是这座巨大数据巢穴中一个微不足道的节点：平庸、疲惫、且极其脆弱。但在这里，你不是观察者，你是<span class='highlight'>神</span>。<br><br>通过操控网络舆论的流向，你可以轻易地捧红他，或者... <span class='shake'>毁灭</span>他。<br><br>记住，对系统而言，他是数据。但对他而言，这是他仅有的一次人生。";
             typeWriter(document.getElementById('intro-text-container'), introText, 30);
         }
 
@@ -570,12 +618,12 @@
             }, 600); // 持续 0.6秒
         }
 
-        // --- 游戏剧本 (扩充版) ---
+        // --- 游戏剧本 (Vividness Protocol) ---
         let stats = { sanity: 80, social: 60, career: 50 };
         const storyNodes = {
             start: {
                 time: "08:31:04",
-                text: "地铁三号线，空气中弥漫着潮湿雨伞和廉价早点的味道。廖忠一拖着沉重的身体挤进了车厢角落。他昨晚为了赶项目进度，一直加班到凌晨四点。此刻，他几乎是昏迷般地跌坐在了爱心专座上。<br><br>他没看到那个刚上车、扶着腰的老人。但他闭眼皱眉的样子，被对面举起的三个手机镜头完整记录了下来。半小时后，一段名为《装睡的巨婴》的视频开始在同城流传。",
+                text: "地铁三号线，空气中弥漫着潮湿雨伞和廉价早点混合的酸味。西斯克拖着沉重的身体挤进了车厢角落。他昨晚为了赶项目进度，一直加班到凌晨四点。此刻，他几乎是昏迷般地跌坐在了爱心专座上，眼下的黑眼圈像淤青一样深重。<br><br>他完全没看到那个刚上车、扶着腰的老人。但他闭眼皱眉的样子，被对面举起的三个手机镜头完整记录了下来。<br><br>半小时后，一段名为《装睡的巨婴》的视频开始在同城流传。算法正在等待你的指令。",
                 choices: [
                     { title: "冷处理", desc: "降权、限流，让视频沉下去。", impact: { sanity: 0, social: 0, career: 0 }, next: "act_suppress" },
                     { title: "煽动情绪", desc: "把标签改成 #冷漠一代，推给愤怒的中年用户。", impact: { sanity: -15, social: -20, career: 0, glitch: true }, next: "act_inflame" },
@@ -584,51 +632,67 @@
             },
             act_suppress: {
                 time: "12:15:00",
-                text: "算法介入很及时。视频播放量卡在了 203 次，没掀起任何波澜。廖忠一对此一无所知，他准时打卡，像往常一样在工位上开始了一天的劳作。但他不知道的是，部门主管刚刚在工作群里发了一条：“最近有些人精神面貌很差，影响团队氛围。”",
+                text: "算法介入很及时。视频播放量卡在了 203 次，没掀起任何波澜。<br>西斯克对此一无所知，他准时打卡，像往常一样在工位上开始了一天的劳作。但他不知道的是，部门主管刚刚在工作群里发了一条：“最近有些人精神面貌很差，影响团队氛围。”",
                 choices: [{ title: "继续监测", desc: "保持静默观察。", impact: {}, next: "incident_night_store" }]
             },
             act_inflame: {
                 time: "12:15:00",
-                text: "视频爆了。播放量突破 50 万。廖忠一刚打开手机，就被 322 条私信轰炸了。“去死吧”、“这就是家教”... 每一个字都像钉子一样扎进眼睛。他在厕所隔间里躲了半小时，出来时，整个办公区的视线都像探照灯一样刺眼。心率监测显示：120bpm。",
+                text: "视频爆了。播放量突破 50 万。<br>西斯克刚打开手机，就被 322 条私信轰炸了。“<span class='shake'>去死吧</span>”、“这就是家教”... 每一个字都像钉子一样扎进眼睛。<br>他在厕所隔间里躲了半小时，出来时，整个办公区的视线都像探照灯一样刺眼。心率监测显示：120bpm。",
                 choices: [{ title: "记录数据", desc: "归档当前压力数值。", impact: {}, next: "incident_night_store" }]
             },
             act_reframe: {
                 time: "12:15:00",
-                text: "舆论风向变了。评论区开始刷屏“心疼小哥”、“打工人何苦为难打工人”。廖忠一成了某种符号。但他还没来得及感动，就被 HR 叫进了办公室。理由是：“你的个人私事过多占用了公共资源，且暗示公司存在压榨行为。”",
+                text: "舆论风向变了。评论区开始刷屏“心疼小哥”、“打工人何苦为难打工人”。<br>西斯克成了某种符号。但他还没来得及感动，就被 HR 叫进了办公室。理由是：“你的个人私事过多占用了公共资源，且暗示公司存在压榨行为。”",
                 choices: [{ title: "更新档案", desc: "更新职级风险指数。", impact: {}, next: "incident_night_store" }]
             },
             incident_night_store: {
                 time: "21:40:00",
-                text: "下班路上，廖忠一走进了那家全家便利店。他买了一份关东煮，甚至奢侈地加了两串贡丸。他坐在落地窗前发呆，手机屏幕亮了又灭。那是他母亲发来的语音：“忠一啊，最近身体怎么样？工作顺利吗？”<br>他举起手指悬在语音键上，犹豫了很久。",
+                text: "下班路上，西斯克走进了那家全家便利店。店员小哥正在打瞌睡，听到门铃声惊醒过来，机械地说了一句“欢迎光临”。<br>西斯克买了一份关东煮，甚至奢侈地加了两串贡丸。他坐在落地窗前发呆，手机屏幕亮了又灭。<br>那是他母亲发来的语音：“西斯克啊，最近身体怎么样？工作顺利吗？”<br>他举起手指悬在语音键上，犹豫了很久。",
                 choices: [
-                    { title: "不回复", desc: "由于极度疲惫，他选择锁屏回家。", impact: { sanity: -5, social: 0, career: 0 }, next: "incident_work" },
-                    { title: "报喜不报忧", desc: "回了一条：“挺好的，刚吃完大餐。”", impact: { sanity: 5, social: 5, career: 0 }, next: "incident_work" }
+                    { title: "沉默", desc: "由于极度疲惫，他选择锁屏回家。", impact: { sanity: -5, social: 0, career: 0 }, next: "incident_dating_app" },
+                    { title: "伪装", desc: "回了一条：“挺好的，刚吃完大餐。”", impact: { sanity: 5, social: 5, career: 0 }, next: "incident_dating_app" }
+                ]
+            },
+            incident_dating_app: {
+                time: "23:15:00",
+                text: "回到出租屋，孤独感像潮水一样涌上来。西斯克鬼使神差地打开了那个积灰的交友软件。<br>居然有人匹配了他。对方叫“Echo”，头像是一个模糊的霓虹灯牌。她发来一条消息：“你也睡不着吗？”<br>这可能是他这周唯一的真实社交机会。",
+                choices: [
+                    { title: "屏蔽信号", desc: "切断网络。专注工作才是生存之道。", impact: { sanity: -10, social: 0, career: 5 }, next: "incident_work" },
+                    { title: "允许连接", desc: "让他们聊天。这能稍微恢复他的理智值。", impact: { sanity: 15, social: 10, career: 0 }, next: "incident_dream" }
+                ]
+            },
+            incident_dream: {
+                time: "03:33:33",
+                text: "西斯克做了一个梦。梦里他还是坐在那个工位上，但他发现电脑屏幕上不是代码，而是<span class='highlight'>你</span>正在看的这个控制台界面。<br>他猛地抬起头，直视着虚空，嘴唇颤抖着似乎想说什么。<br><span class='glitch-text' data-text='SYSTEM ERROR'>系统检测到第四面墙出现裂痕。</span>",
+                choices: [
+                    { title: "强制唤醒", desc: "电击刺激，让他醒来。", impact: { sanity: -5, social: 0, career: 0, glitch: true }, next: "incident_work" },
+                    { title: "忽略异常", desc: "这只是普通的噩梦。", impact: { sanity: 0, social: 0, career: 0 }, next: "incident_work" }
                 ]
             },
             incident_work: {
                 time: "11-15 19:42",
-                text: "一周后。高压环境下，廖忠一在一个只有四人的私密群组里发了一句牢骚：“管理层这次的决策逻辑简直是脑瘫。”<br>这是一句普通的发泄。但系统监测到，群成员 [同事A] 正在进行截屏操作，且目标发送对象是公司副总。<br>拦截窗口期仅剩 5 秒。",
+                text: "一周后。高压环境下，西斯克在一个只有四人的私密群组里发了一句牢骚：“管理层这次的决策逻辑简直是脑瘫。”<br>这是一句普通的发泄。但系统监测到，群成员 [同事A] 正在进行截屏操作，且目标发送对象是公司副总。<br>拦截窗口期仅剩 5 秒。",
                 choices: [
                     { title: "数据阻断", desc: "制造网络丢包，让截图发送失败。", impact: { sanity: 5, social: 0, career: 0 }, next: "res_saved" },
                     { title: "全域广播", desc: "不仅放行，还将截图转发至全员邮件。", impact: { sanity: -30, social: -10, career: -100, glitch: true }, next: "res_fired" },
                     { title: "无视", desc: "这是人类社交的自然淘汰。", impact: { sanity: -10, social: -5, career: -30, glitch: true }, next: "res_leaked" }
                 ]
             },
-            res_saved: { time: "20:00:00", text: "红色的感叹号出现在同事 A 的屏幕上。他试了几次都没发出去，最后怕被发现，骂骂咧咧地删掉了图片。廖忠一并不知道，自己刚刚在悬崖边走了一遭。", choices: [{ title: "下个周期", desc: "加载后续事件。", impact: {}, next: "incident_street" }] },
-            res_leaked: { time: "DAY +01", text: "第二天一早，廖忠一就被移出了项目组。没有正式通报，但年度绩效奖金已归零。他的工位被调整到了靠近厕所的监控盲区。同事们开始像躲避瘟疫一样避开他。", choices: [{ title: "下个周期", desc: "加载后续事件。", impact: {}, next: "incident_street" }] },
-            res_fired: { time: "DAY +01", text: "炸锅了。那封邮件成了全公司的笑话。廖忠一被保安“请”出了大楼。没有赔偿，只有羞辱。他抱着纸箱站在CBD的十字路口，像个透明的幽灵。", choices: [{ title: "下个周期", desc: "加载后续事件。", impact: {}, next: "incident_street" }] },
+            res_saved: { time: "20:00:00", text: "红色的感叹号出现在同事 A 的屏幕上。他试了几次都没发出去，最后怕被发现，骂骂咧咧地删掉了图片。<br>西斯克并不知道，自己刚刚在悬崖边走了一遭。", choices: [{ title: "下个周期", desc: "加载后续事件。", impact: {}, next: "incident_street" }] },
+            res_leaked: { time: "DAY +01", text: "第二天一早，西斯克就被移出了项目组。没有正式通报，但年度绩效奖金已归零。<br>他的工位被调整到了靠近厕所的监控盲区。同事们开始像躲避瘟疫一样避开他。", choices: [{ title: "下个周期", desc: "加载后续事件。", impact: {}, next: "incident_street" }] },
+            res_fired: { time: "DAY +01", text: "炸锅了。那封邮件成了全公司的笑话。西斯克被保安“请”出了大楼。<br>没有赔偿，只有羞辱。他抱着纸箱站在CBD的十字路口，像个透明的幽灵。", choices: [{ title: "下个周期", desc: "加载后续事件。", impact: {}, next: "incident_street" }] },
             incident_street: {
                 time: "11-20 23:11",
-                text: "深夜，老旧小区的巷子里传来猫的惨叫声。廖忠一看到两个醉酒的混混正在踢打一只流浪猫。那是他经常喂的那只橘猫。<br>愤怒冲昏了头脑，他冲上去推开了其中一人。混混倒地时头磕到了砖块，血流了出来。<br>警察正在赶来。这里是监控死角。如何定性这起事件？",
+                text: "深夜，老旧小区的巷子里传来猫的惨叫声。<br>西斯克看到两个醉酒的混混正在踢打一只流浪猫。那是他经常喂的那只橘猫，现在正奄奄一息地躺在泥水里。<br><span class='shake'>愤怒</span>冲昏了头脑，他冲上去推开了其中一人。混混倒地时头磕到了砖块，血流了出来。<br>警察正在赶来。这里是监控死角。如何定性这起事件？",
                 choices: [
                     { title: "证据合成", desc: "伪造卫星热成像，判定正当防卫。", impact: { sanity: 10, social: 20, career: 0 }, next: "end_hero" },
                     { title: "恶意剪辑", desc: "仅保留推人画面，定性为故意伤害。", impact: { sanity: -50, social: -50, career: -50, glitch: true }, next: "end_ruin" },
                     { title: "不作为", desc: "不进行数据干预，大概率定性互殴。", impact: { sanity: -5, social: -5, career: -5 }, next: "end_mediocre" }
                 ]
             },
-            end_hero: { time: "ARCHIVE", text: "【结局：微光】<br>警方采纳了证据。廖忠一被认定为见义勇为。虽然生活依然艰难，房租依然要涨，但那天晚上，他抱着那只幸存的猫，睡了个安稳觉。<br>观察结束。", choices: [{ title: "重置系统", desc: "清除缓存数据。", impact: {}, next: "start" }] },
-            end_ruin: { time: "ARCHIVE", text: "【结局：坠落】<br>舆论一边倒地指责他是“暴力狂”。工作丢了，房东退租了。他在互联网上社会性死亡，在现实中也没了立足之地。他消失在了那个寒冷的冬夜。<br>观察结束。", choices: [{ title: "重置系统", desc: "清除缓存数据。", impact: {}, next: "start" }] },
-            end_mediocre: { time: "ARCHIVE", text: "【结局：尘埃】<br>赔了医药费，拘留了三天。出来后，他像什么都没发生一样，继续挤地铁，继续加班。只是眼神里最后一点光也熄灭了。<br>观察结束。", choices: [{ title: "重置系统", desc: "清除缓存数据。", impact: {}, next: "start" }] }
+            end_hero: { time: "ARCHIVE", text: "【结局：微光】<br>警方采纳了证据。西斯克被认定为见义勇为。虽然生活依然艰难，房租依然要涨，但那天晚上，他抱着那只幸存的猫，睡了个安稳觉。<br>你给予了他在这座冰冷城市里唯一的温暖。<br><br>观察结束。", choices: [{ title: "重置系统", desc: "清除缓存数据。", impact: {}, next: "start" }] },
+            end_ruin: { time: "ARCHIVE", text: "【结局：坠落】<br>舆论一边倒地指责他是“暴力狂”。工作丢了，房东退租了。他在互联网上社会性死亡，在现实中也没了立足之地。<br>他消失在了那个寒冷的冬夜，成为了一串被遗忘的代码。<br><br>观察结束。", choices: [{ title: "重置系统", desc: "清除缓存数据。", impact: {}, next: "start" }] },
+            end_mediocre: { time: "ARCHIVE", text: "【结局：尘埃】<br>赔了医药费，拘留了三天。出来后，他像什么都没发生一样，继续挤地铁，继续加班。<br>只是眼神里最后一点光也熄灭了。他彻底融入了这座城市的背景板。<br><br>观察结束。", choices: [{ title: "重置系统", desc: "清除缓存数据。", impact: {}, next: "start" }] }
         };
 
         // --- 逻辑引擎 ---
